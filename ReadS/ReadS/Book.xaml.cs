@@ -86,9 +86,10 @@ namespace ReadS
         public void rightClick(object sender, EventArgs e)
         {
             positionOfBook += 770;
+            Goal.pagesRead++;
             scroll.ScrollToAsync(0, positionOfBook, false); //scrolls so that the position at 150px from the top is visible
             Goal.pagesRead += 1;
-
+            Goal.RefreshGoalGraph();
         }
 
         public void leftClick(object sender, EventArgs e)
