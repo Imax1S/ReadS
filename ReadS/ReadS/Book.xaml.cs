@@ -48,7 +48,6 @@ namespace ReadS
                 Source = htmlCon,
                 VerticalOptions = LayoutOptions.FillAndExpand
             };
-
             scroll.Content = label;
             Content = new StackLayout()
             {

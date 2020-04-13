@@ -40,7 +40,7 @@ namespace ReadS
             Slider slider = new Slider
             {
                 Minimum = 0,
-                Maximum = 500,
+                Maximum = 100,
             };
             slider.VerticalOptions = LayoutOptions.FillAndExpand;
             slider.VerticalOptions = LayoutOptions.CenterAndExpand;
@@ -60,10 +60,11 @@ namespace ReadS
                 {
                     pages.Text = "Передвиньте ползунок, чтобы поставить цель";
                     goalPages = (int)slider.Value;
-                    RefreshGoalGraph();
+                    StatsOfReading.Opacity = 0;
                 }
                 else
                 {
+                    StatsOfReading.Opacity = 100;
                     goalPages = (int)slider.Value;
                     pages.Text = String.Format("Цель {0} страниц", (int)args.NewValue);
                     RefreshGoalGraph();
@@ -102,7 +103,7 @@ namespace ReadS
         };
             StatsOfReading.HorizontalOptions = LayoutOptions.FillAndExpand;
             StatsOfReading.VerticalOptions = LayoutOptions.FillAndExpand;
-            StatsOfReading.Chart = new Microcharts.DonutChart { Entries = entries };
+            StatsOfReading.Chart = new Microcharts.DonutChart { Entries = entries, LabelTextSize = 40 };
         }
     }
 }

@@ -20,32 +20,33 @@ namespace ReadS
             {
                 Color = SKColor.Parse("#4285F4"),
                 Label = "Январь",
-                ValueLabel = Goal.goalPages.ToString()
+                ValueLabel = "900 стр"
             },
 
             new Entry(1500)
             {
                 Color = SKColor.Parse("#4285F4"),
                 Label = "Февраль",
-                ValueLabel = Goal.goalPages.ToString()
-            },
+                ValueLabel = "1500 стр"
+    },
 
             new Entry(3000)
             {
                 Color = SKColor.Parse("#4285F4"),
                 Label = "Апрель",
-                ValueLabel = Goal.goalPages.ToString()
-            },
+                ValueLabel ="3000 стр"
+    },
         };
         public Statics()
         {
             InitializeComponent();
 
-            StatsOfReadingByDates.HorizontalOptions = LayoutOptions.FillAndExpand;
-            StatsOfReadingByDates.VerticalOptions = LayoutOptions.FillAndExpand;
+            StatsOfReadingByDates.HorizontalOptions = LayoutOptions.Fill;
+            StatsOfReadingByDates.VerticalOptions = LayoutOptions.EndAndExpand;
             //StatsOfReading.Chart = new Microcharts.RadialGaugeChart {Entries = entries };
             //StatsOfReading.Chart = new Microcharts.DonutChart { Entries = entries };
-            StatsOfReadingByDates.Chart = new Microcharts.BarChart { Entries = entries };
+            
+            StatsOfReadingByDates.Chart = new Microcharts.BarChart { Entries = entries, LabelTextSize = 40, BackgroundColor = SKColor.Parse("#FFFFFF")};
         }
     }
 }

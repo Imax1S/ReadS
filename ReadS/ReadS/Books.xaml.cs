@@ -19,7 +19,7 @@ namespace ReadS
         public ObservableCollection<string> tems { get; set; }
         public Label label1;
         Dictionary<string, EpubBook> books = new Dictionary<string, EpubBook>();
-        List<Book> loadedBooks = new List<Book>();
+        List<Book2> loadedBooks = new List<Book2>();
         List<string> loadedBooksNames = new List<string>();
 
         public Books()
@@ -69,7 +69,7 @@ namespace ReadS
             else
             {
                 loadedBooksNames.Add((sender as Button).Text);
-                loadedBooks.Add(new Book(books[(sender as Button).Text]));
+                loadedBooks.Add(new Book2(books[(sender as Button).Text]));
                 await Navigation.PushAsync(loadedBooks[loadedBooks.Count - 1]);
             }
         }
