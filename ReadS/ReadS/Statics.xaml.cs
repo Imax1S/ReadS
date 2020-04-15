@@ -42,7 +42,8 @@ namespace ReadS
             InitializeComponent();
 
             StatsOfReadingByDates.HorizontalOptions = LayoutOptions.Fill;
-            StatsOfReadingByDates.VerticalOptions = LayoutOptions.EndAndExpand;
+            StatsOfReadingByDates.VerticalOptions = LayoutOptions.FillAndExpand;
+            StatsOfReadingByDates.Margin = 30;
             //StatsOfReading.Chart = new Microcharts.RadialGaugeChart {Entries = entries };
             //StatsOfReading.Chart = new Microcharts.DonutChart { Entries = entries };
             

@@ -46,6 +46,7 @@ namespace ReadS
             slider.VerticalOptions = LayoutOptions.CenterAndExpand;
             slider.ThumbColor = Color.Gray;
             slider.MinimumTrackColor = Color.CadetBlue;
+            slider.Margin = 20;
             //slider = 100;
 
             pages.Text = "Передвиньте ползунок, чтобы поставить цель";
@@ -56,7 +57,7 @@ namespace ReadS
 
             slider.ValueChanged += (sender, args) =>
             {
-                if (slider.Value == 0)
+                if ((int)slider.Value == 0)
                 {
                     pages.Text = "Передвиньте ползунок, чтобы поставить цель";
                     goalPages = (int)slider.Value;
@@ -66,8 +67,16 @@ namespace ReadS
                 {
                     StatsOfReading.Opacity = 100;
                     goalPages = (int)slider.Value;
-                    pages.Text = String.Format("Цель {0} страниц", (int)args.NewValue);
-                    RefreshGoalGraph();
+                    if (goalPages <= pagesRead)
+                    {
+                        pages.Text = String.Format("Цель {0} страниц выполнена!", (int)args.NewValue);
+                        RefreshGoalGraph();
+                    }
+                    else
+                    {
+                        pages.Text = String.Format("Цель {0} страниц", (int)args.NewValue);
+                        RefreshGoalGraph();
+                    }
                 }
 
             };
@@ -91,7 +100,7 @@ namespace ReadS
             {
                 Color = SKColor.Parse("#4285F4"),
                 Label = "Осталось",
-                ValueLabel = Goal.goalPages.ToString()
+                ValueLabel = (Goal.goalPages - pagesRead).ToString()
             },
 
             new Entry(pagesRead)
@@ -103,7 +112,7 @@ namespace ReadS
         };
             StatsOfReading.HorizontalOptions = LayoutOptions.FillAndExpand;
             StatsOfReading.VerticalOptions = LayoutOptions.FillAndExpand;
-            StatsOfReading.Chart = new Microcharts.DonutChart { Entries = entries, LabelTextSize = 40 };
+            StatsOfReading.Chart = new Microcharts.DonutChart { Entries = entries, LabelTextSize = 40};
         }
     }
 }

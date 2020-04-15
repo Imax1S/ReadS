@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Plugin.FilePicker;
+using Plugin.FilePicker.Abstractions;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -21,42 +23,45 @@ namespace ReadS
         Dictionary<string, EpubBook> books = new Dictionary<string, EpubBook>();
         List<Book2> loadedBooks = new List<Book2>();
         List<string> loadedBooksNames = new List<string>();
+        Button load = new Button();
+        Grid library = new Grid();
+        ScrollView scroll = new ScrollView()
+        {
+            Orientation = ScrollOrientation.Vertical
+        };
 
         public Books()
         {
             InitializeComponent();
 
-            Grid library = new Grid();
-
             #region How to load a text file embedded resource
-            var assembly = IntrospectionExtensions.GetTypeInfo(typeof(Books)).Assembly;
-            Stream stream = assembly.GetManifestResourceStream("ReadS.homo_deus.epub");
-            using (var reader = new StreamReader(stream))
-            {
-                EpubBook book = EpubReader.ReadBook(stream);
-                books.Add(book.Title, book);
-            }
+
+
+            //var assembly = IntrospectionExtensions.GetTypeInfo(typeof(Books)).Assembly;
+            //Stream stream = assembly.GetManifestResourceStream("ReadS.homo_deus.epub");
+            //using (var reader = new StreamReader(stream))
+            //{
+            //    EpubBook book = EpubReader.ReadBook(stream);
+            //    books.Add(book.Title, book);
+            //}
             #endregion
+            load.Text = "Загрузить книгу";
+            load.Clicked += LoadButtonClicked;
 
-            foreach (string book in books.Keys)
-            {
-                Button book_button = new Button();
-                book_button.Text = book;
-                book_button.Clicked += Book_Clicked;
+            //foreach (string book in books.Keys)
+            //{
+            //    Button book_button = new Button();
+            //    book_button.Text = book;
+            //    book_button.Clicked += Book_Clicked;
 
-                library.RowDefinitions.Add(new RowDefinition { Height = new GridLength(2, GridUnitType.Star) });
-                library.Children.Add(book_button);
-            }
-
-            ScrollView scroll = new ScrollView()
-            {
-                Orientation = ScrollOrientation.Vertical
-            };
+            //    library.RowDefinitions.Add(new RowDefinition { Height = new GridLength(2, GridUnitType.Star) });
+            //    library.Children.Add(book_button);
+            //}
 
             scroll.Content = library;
             Content = new StackLayout()
             {
-                Children = { scroll }
+                Children = { scroll, load}
             };
         }
 
@@ -73,16 +78,43 @@ namespace ReadS
                 await Navigation.PushAsync(loadedBooks[loadedBooks.Count - 1]);
             }
         }
-        async void Handle_ItemTapped(object sender, ItemTappedEventArgs e)
+        async void LoadButtonClicked(object sender, EventArgs e)
         {
-            if (e.Item == null)
-                return;
+            try
+            {
+                string[] types = new string[] { ".epub" };
+                FileData fileData = await CrossFilePicker.Current.PickFile(allowedTypes: types);
+                if (fileData == null)
+                    return; // user canceled file picking
 
-            await DisplayAlert("Item Tapped", "An item was tapped.", "OK");
-            ContentPage page = new ContentPage();
+                string fileName = fileData.FileName;
+                string contents = System.Text.Encoding.UTF8.GetString(fileData.DataArray);
 
-            //Deselect Item
-            ((ListView)sender).SelectedItem = null;
+                Console.WriteLine("File name chosen: " + fileName);
+                Console.WriteLine("File data: " + contents);
+                EpubBook newBook = EpubReader.ReadBook(new MemoryStream(fileData.DataArray));
+                books.Add(newBook.Title, newBook);
+                LoadNewBook(newBook);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Exception choosing file: " + ex.ToString());
+            }
+        }
+
+        public void LoadNewBook(EpubBook book)
+        {
+            Button book_button = new Button();
+            book_button.Text = book.Title;
+            book_button.Clicked += Book_Clicked;
+
+            //library.RowDefinitions.Add(new RowDefinition { Height = new GridLength(2, GridUnitType.Star) });
+            library.Children.Add(book_button);
+            scroll.Content = library;
+            Content = new StackLayout()
+            {
+                Children = { load, scroll }
+            };
         }
     }
 }
