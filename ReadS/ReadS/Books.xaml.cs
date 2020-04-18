@@ -23,17 +23,43 @@ namespace ReadS
         Dictionary<string, EpubBook> books = new Dictionary<string, EpubBook>();
         List<Book2> loadedBooks = new List<Book2>();
         List<string> loadedBooksNames = new List<string>();
-        Button load = new Button();
-        Grid library = new Grid();
+        List<Button> buttonsBook = new List<Button>();
+        //Button load = new Button();
+        Grid library = new Grid()
+        {
+            VerticalOptions = LayoutOptions.FillAndExpand,
+            RowDefinitions =
+                {
+                    new RowDefinition { Height = GridLength.Auto },
+                    new RowDefinition { Height = GridLength.Auto },
+                    new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+                    new RowDefinition { Height = new GridLength(100, GridUnitType.Absolute) }
+                },
+            ColumnDefinitions =
+                {
+                    new ColumnDefinition { Width = GridLength.Auto },
+                    new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                    new ColumnDefinition { Width = new GridLength(100, GridUnitType.Absolute) }
+                }
+        };
         ScrollView scroll = new ScrollView()
         {
             Orientation = ScrollOrientation.Vertical
+        };
+        ToolbarItem item = new ToolbarItem
+        {
+            Text = "Добавить книгу",
+           // IconImageSource = ImageSource.FromFile("baseline_more_vert_black_48dp.png"),
+            Order = ToolbarItemOrder.Secondary,
+            Priority = 0
         };
 
         public Books()
         {
             InitializeComponent();
-
+             
+            this.ToolbarItems.Add(item);
+            item.Clicked += LoadButtonClicked;
             #region How to load a text file embedded resource
 
 
@@ -45,8 +71,8 @@ namespace ReadS
             //    books.Add(book.Title, book);
             //}
             #endregion
-            load.Text = "Загрузить книгу";
-            load.Clicked += LoadButtonClicked;
+            //load.Text = "Загрузить книгу";
+            //load.Clicked += LoadButtonClicked;
 
             //foreach (string book in books.Keys)
             //{
@@ -58,10 +84,10 @@ namespace ReadS
             //    library.Children.Add(book_button);
             //}
 
-            scroll.Content = library;
+            //scroll.Content = library;
             Content = new StackLayout()
             {
-                Children = { scroll, load}
+                Children = { scroll }
             };
         }
 
@@ -109,12 +135,18 @@ namespace ReadS
             book_button.Clicked += Book_Clicked;
 
             //library.RowDefinitions.Add(new RowDefinition { Height = new GridLength(2, GridUnitType.Star) });
-            library.Children.Add(book_button);
+            //library.Children.Add(book_button);
+            buttonsBook.Add(book_button);
+            for (int i = 0; i < buttonsBook.Count; i++)
+            {
+                library.Children.Add(buttonsBook[i], 0, i);
+            }
             scroll.Content = library;
             Content = new StackLayout()
             {
-                Children = { load, scroll }
+                Children = { scroll }
             };
         }
+
     }
 }
