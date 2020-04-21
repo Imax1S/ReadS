@@ -31,16 +31,16 @@ namespace ReadS
             VerticalOptions = LayoutOptions.FillAndExpand,
             RowDefinitions =
                 {
-                    new RowDefinition { Height = GridLength.Auto },
-                    new RowDefinition { Height = GridLength.Auto },
-                    new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
+                    //new RowDefinition { Height = GridLength.Auto },
+                    //new RowDefinition { Height = GridLength.Auto },
+                    new RowDefinition { Height = new GridLength(100, GridUnitType.Absolute) },
                     new RowDefinition { Height = new GridLength(100, GridUnitType.Absolute) }
                 },
             ColumnDefinitions =
                 {
-                    new ColumnDefinition { Width = GridLength.Auto },
                     new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
-                    new ColumnDefinition { Width = new GridLength(100, GridUnitType.Absolute) }
+                    new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                   // new ColumnDefinition { Width = new GridLength(100, GridUnitType.Absolute) }
                 }
         };
         ScrollView scroll = new ScrollView()
@@ -66,7 +66,10 @@ namespace ReadS
                 Label noBook = new Label()
                 {
                     Text = "Нажмите на три точки, чтобы добавить книгу",
-                    VerticalOptions = LayoutOptions.CenterAndExpand
+                    VerticalOptions = LayoutOptions.CenterAndExpand,
+                    HorizontalOptions = LayoutOptions.CenterAndExpand,
+                    FontSize = 16,
+                    Padding = 10
                 };
                 Content = new StackLayout()
                 {
@@ -157,9 +160,12 @@ namespace ReadS
             //library.RowDefinitions.Add(new RowDefinition { Height = new GridLength(2, GridUnitType.Star) });
             //library.Children.Add(book_button);
             buttonsBook.Add(book_button);
+            ImageButton image = new ImageButton();
+            image.Source = ImageSource.FromStream(() => new MemoryStream(book.CoverImage));
             for (int i = 0; i < buttonsBook.Count; i++)
             {
                 library.Children.Add(buttonsBook[i], 0, i);
+                library.Children.Add(image, 1, i);
             }
             scroll.Content = library;
             Content = new StackLayout()
