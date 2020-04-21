@@ -19,10 +19,19 @@ namespace ReadS
         //CarouselView carouselView = new CarouselView();
         List<StackLayout> stacks = new List<StackLayout>();
         int index = 1;
+        ToolbarItem item = new ToolbarItem
+        {
+            Text = "Шрифт",
+            // IconImageSource = ImageSource.FromFile("baseline_more_vert_black_48dp.png"),
+            Order = ToolbarItemOrder.Secondary,
+            Priority = 0
+        };
 
         public Book2(EpubBook book)
         {
             InitializeComponent();
+            this.ToolbarItems.Add(item);
+
             htmlCon = readBook(book);
             string temp = "";
             Label label = new Label()

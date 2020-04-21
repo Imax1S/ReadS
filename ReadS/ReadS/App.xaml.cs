@@ -3,6 +3,7 @@ using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using ReadS.Services;
 using ReadS.Views;
+using System.Diagnostics;
 
 namespace ReadS
 {
@@ -23,6 +24,7 @@ namespace ReadS
 
         protected override void OnSleep()
         {
+            Debug.WriteLine("OnSleep");
         }
 
         protected override void OnResume()

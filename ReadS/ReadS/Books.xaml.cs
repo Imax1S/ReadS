@@ -21,6 +21,7 @@ namespace ReadS
         public ObservableCollection<string> tems { get; set; }
         public Label label1;
         Dictionary<string, EpubBook> books = new Dictionary<string, EpubBook>();
+        //List<Book> loadedBooks = new List<Book>();
         List<Book2> loadedBooks = new List<Book2>();
         List<string> loadedBooksNames = new List<string>();
         List<Button> buttonsBook = new List<Button>();
@@ -60,6 +61,18 @@ namespace ReadS
              
             this.ToolbarItems.Add(item);
             item.Clicked += LoadButtonClicked;
+            if (books.Count == 0)
+            {
+                Label noBook = new Label()
+                {
+                    Text = "Нажмите на три точки, чтобы добавить книгу",
+                    VerticalOptions = LayoutOptions.CenterAndExpand
+                };
+                Content = new StackLayout()
+                {
+                    Children = { noBook }
+                };
+            }
             #region How to load a text file embedded resource
 
 
@@ -85,10 +98,6 @@ namespace ReadS
             //}
 
             //scroll.Content = library;
-            Content = new StackLayout()
-            {
-                Children = { scroll }
-            };
         }
 
         private async void Book_Clicked(object sender, EventArgs e)
@@ -103,6 +112,17 @@ namespace ReadS
                 loadedBooks.Add(new Book2(books[(sender as Button).Text]));
                 await Navigation.PushAsync(loadedBooks[loadedBooks.Count - 1]);
             }
+
+            //if (loadedBooksNames.Contains((sender as Button).Text))
+            //{
+            //    await Navigation.PushAsync(loadedBooks[loadedBooksNames.IndexOf((sender as Button).Text)]);
+            //}
+            //else
+            //{
+            //    loadedBooksNames.Add((sender as Button).Text);
+            //    loadedBooks.Add(new Book(books[(sender as Button).Text]));
+            //    await Navigation.PushAsync(loadedBooks[loadedBooks.Count - 1]);
+            //}
         }
         async void LoadButtonClicked(object sender, EventArgs e)
         {

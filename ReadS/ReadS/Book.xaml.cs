@@ -14,8 +14,8 @@ namespace ReadS
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class Book : ContentPage
     {
-        ScrollView scroll;
-        Label label;
+        //ScrollView scroll;
+        //Label label;
         string htmlCon = "";
         public static int positionOfBook = 0;
         public Book(EpubBook book)
@@ -32,32 +32,28 @@ namespace ReadS
             leftButton.HorizontalOptions = LayoutOptions.Start;
             //leftButton.Opacity = 0;
 
-            label = readBook(book);
-            scroll = new ScrollView()
-            {
-                Orientation = ScrollOrientation.Vertical
-            };
+            //label = readBook(book);
+            //scroll = new ScrollView()
+            //{
+            //    Orientation = ScrollOrientation.Vertical
+            //};
 
-            HtmlWebViewSource htmlWebView = new HtmlWebViewSource();
-            htmlWebView.Html = htmlCon;
+            var htmlWebView = new HtmlWebViewSource();
+            htmlWebView.Html = @readBook(book);
 
-            WebView webView = new WebView
-            {
-                //Source = new UrlWebViewSource { Url = "http://blog.xamarin.com/" },
-                //Source = new HtmlWebViewSource {BaseUrl= htmlContent },
-                Source = htmlCon,
-                VerticalOptions = LayoutOptions.FillAndExpand
-            };
-            scroll.Content = label;
+            //htmlWebView.Html = htmlCon;
+
+            WebView webView = new WebView();
+            webView.Source = htmlWebView;
+           // scroll.Content = label;
             Content = new StackLayout()
             {
-                Children = { scroll, rightButton, leftButton },
+                Children = { webView }
             };
         }
 
-        public Label readBook(EpubBook book)
+        public string readBook(EpubBook book)
         {
-            Label label;
             string chapterHtmlContent = "";
             foreach (EpubChapter chapter in book.Chapters)
             {
@@ -74,22 +70,18 @@ namespace ReadS
                     chapterHtmlContent += item.HtmlContent;
                     htmlCon = chapter.HtmlContent;
                 }
-            }
-            label = new Label();
-            label.Text = chapterHtmlContent;
-            label.FontSize = 15;
-            label.TextType = TextType.Html;
-            return label;
+            } 
+            return chapterHtmlContent;
         }
-
+          
         public void rightClick(object sender, EventArgs e)
         {
             positionOfBook += 770;
             Goal.pagesRead++;
-            scroll.ScrollToAsync(0, positionOfBook, false); //scrolls so that the position at 150px from the top is visible
+           // scroll.ScrollToAsync(0, positionOfBook, false); //scrolls so that the position at 150px from the top is visible
             Goal.pagesRead += 1;
             Goal.RefreshGoalGraph();
-        }
+        } 
 
         public void leftClick(object sender, EventArgs e)
         {
@@ -97,7 +89,7 @@ namespace ReadS
             {
                 positionOfBook -= 770;
             }
-            scroll.ScrollToAsync(0, positionOfBook, false); //scrolls so that the position at 150px from the top is visible
+            //scroll.ScrollToAsync(0, positionOfBook, false); //scrolls so that the position at 150px from the top is visible
         }
     }
 }
