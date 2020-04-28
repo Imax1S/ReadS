@@ -170,6 +170,7 @@ namespace ReadS
             if (index < Children.IndexOf(CurrentPage))
             {
                 Goal.pagesRead++;
+                Goal.SaveGoal();
                 Goal.RefreshGoalGraph();
                 index = Children.IndexOf(CurrentPage);
             }

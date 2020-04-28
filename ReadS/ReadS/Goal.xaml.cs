@@ -42,9 +42,9 @@ namespace ReadS
             InitializeComponent();
             try
             {
-                using ( var streamReader = new StreamReader(filename))
+                using (var streamReader = new StreamReader(filename))
                 {
-                    string content = streamReader.ReadLine();   
+                    string content = streamReader.ReadLine();
                     string[] info = content.Split(':');
                     goalPages = int.Parse(info[0]);
                     pagesRead = int.Parse(info[1]);
@@ -112,12 +112,7 @@ namespace ReadS
                         pages.Text = String.Format("Цель {0} страниц", (int)args.NewValue);
                         RefreshGoalGraph();
                     }
-
-                    using (var streamWriter = new StreamWriter(filename, false))
-                    {
-                        streamWriter.WriteLine(goalPages+":"+pagesRead);
-                    }
-
+                    SaveGoal();
                 }
 
             };
@@ -154,6 +149,14 @@ namespace ReadS
             StatsOfReading.HorizontalOptions = LayoutOptions.FillAndExpand;
             StatsOfReading.VerticalOptions = LayoutOptions.FillAndExpand;
             StatsOfReading.Chart = new Microcharts.DonutChart { Entries = entries, LabelTextSize = 40 };
+        }
+
+        public static void SaveGoal()
+        {
+            using (var streamWriter = new StreamWriter(filename, false))
+            {
+                streamWriter.WriteLine(goalPages + ":" + pagesRead);
+            }
         }
     }
 }

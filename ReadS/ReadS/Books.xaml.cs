@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -135,6 +136,7 @@ namespace ReadS
                 string contents = System.Text.Encoding.UTF8.GetString(fileData.DataArray);
 
                 Console.WriteLine("File name chosen: " + fileName);
+                Debug.WriteLine("File data: " + contents);
                 Console.WriteLine("File data: " + contents);
                 EpubBook newBook = EpubReader.ReadBook(new MemoryStream(fileData.DataArray));
                 books.Add(newBook.Title, newBook);
