@@ -8,6 +8,7 @@ using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using Entry = Microcharts.Entry;
 using SkiaSharp;
+using SQLite;
 
 namespace ReadS
 {

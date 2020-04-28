@@ -1,4 +1,5 @@
-﻿using Plugin.FilePicker;
+﻿using Newtonsoft.Json;
+using Plugin.FilePicker;
 using Plugin.FilePicker.Abstractions;
 using System;
 using System.Collections.Generic;
@@ -8,24 +9,26 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 using VersFx.Formats.Text.Epub;
 using VersFx.Formats.Text.Epub.Schema.Navigation;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+
 
 namespace ReadS
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class Books : ContentPage
     {
-        public ObservableCollection<string> tems { get; set; }
-        public Label label1;
+        //public ObservableCollection<string> tems { get; set; }
+
+        //Здесь хранятся книги и их названия
         Dictionary<string, EpubBook> books = new Dictionary<string, EpubBook>();
-        //List<Book> loadedBooks = new List<Book>();
+
         List<Book2> loadedBooks = new List<Book2>();
         List<string> loadedBooksNames = new List<string>();
         List<Button> buttonsBook = new List<Button>();
-        //Button load = new Button();
         Grid library = new Grid()
         {
             VerticalOptions = LayoutOptions.FillAndExpand,
@@ -43,39 +46,45 @@ namespace ReadS
                    // new ColumnDefinition { Width = new GridLength(100, GridUnitType.Absolute) }
                 }
         };
+
+        //Скролл для кнопок
         ScrollView scroll = new ScrollView()
         {
             Orientation = ScrollOrientation.Vertical
         };
+
+        //Инструменты
         ToolbarItem item = new ToolbarItem
         {
             Text = "Добавить книгу",
-           // IconImageSource = ImageSource.FromFile("baseline_more_vert_black_48dp.png"),
+            // IconImageSource = ImageSource.FromFile("baseline_more_vert_black_48dp.png"),
             Order = ToolbarItemOrder.Secondary,
             Priority = 0
         };
 
+
         public Books()
         {
             InitializeComponent();
-             
+
             this.ToolbarItems.Add(item);
             item.Clicked += LoadButtonClicked;
-            if (books.Count == 0)
+
+
+
+            Label noBook = new Label()
             {
-                Label noBook = new Label()
-                {
-                    Text = "Нажмите на три точки, чтобы добавить книгу",
-                    VerticalOptions = LayoutOptions.CenterAndExpand,
-                    HorizontalOptions = LayoutOptions.CenterAndExpand,
-                    FontSize = 16,
-                    Padding = 10
-                };
-                Content = new StackLayout()
-                {
-                    Children = { noBook }
-                };
-            }
+                Text = "Нажмите на три точки, чтобы добавить книгу",
+                VerticalOptions = LayoutOptions.CenterAndExpand,
+                HorizontalOptions = LayoutOptions.CenterAndExpand,
+                FontSize = 16,
+                Padding = 10
+            };
+            Content = new StackLayout()
+            {
+                Children = { noBook }
+            };
+
             #region How to load a text file embedded resource
 
 
@@ -87,20 +96,6 @@ namespace ReadS
             //    books.Add(book.Title, book);
             //}
             #endregion
-            //load.Text = "Загрузить книгу";
-            //load.Clicked += LoadButtonClicked;
-
-            //foreach (string book in books.Keys)
-            //{
-            //    Button book_button = new Button();
-            //    book_button.Text = book;
-            //    book_button.Clicked += Book_Clicked;
-
-            //    library.RowDefinitions.Add(new RowDefinition { Height = new GridLength(2, GridUnitType.Star) });
-            //    library.Children.Add(book_button);
-            //}
-
-            //scroll.Content = library;
         }
 
         private async void Book_Clicked(object sender, EventArgs e)
@@ -153,26 +148,28 @@ namespace ReadS
 
         public void LoadNewBook(EpubBook book)
         {
-            Button book_button = new Button();
+
+            Button book_button = new Button()
+            {
+                //ContentLayout = new Button.ButtonContentLayout(Button.ButtonContentLayout.ImagePosition.Right , 0)
+            };
             book_button.Text = book.Title;
             book_button.Clicked += Book_Clicked;
+            //book_button.ImageSource = ImageSource.FromStream(() => new MemoryStream(book.CoverImage));
 
-            //library.RowDefinitions.Add(new RowDefinition { Height = new GridLength(2, GridUnitType.Star) });
-            //library.Children.Add(book_button);
             buttonsBook.Add(book_button);
             ImageButton image = new ImageButton();
             image.Source = ImageSource.FromStream(() => new MemoryStream(book.CoverImage));
-            for (int i = 0; i < buttonsBook.Count; i++)
-            {
-                library.Children.Add(buttonsBook[i], 0, i);
-                library.Children.Add(image, 1, i);
-            }
+            library.RowDefinitions.Add(new RowDefinition { Height = new GridLength(100, GridUnitType.Absolute) });
+
+            library.Children.Add(buttonsBook[buttonsBook.Count - 1], 1, buttonsBook.Count - 1);
+            library.Children.Add(image, 0, buttonsBook.Count - 1);
+
             scroll.Content = library;
             Content = new StackLayout()
             {
                 Children = { scroll }
             };
         }
-
     }
 }
