@@ -9,10 +9,12 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using VersFx.Formats.Text.Epub;
 using VersFx.Formats.Text.Epub.Schema.Navigation;
+using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -30,6 +32,7 @@ namespace ReadS
         List<Book2> loadedBooks = new List<Book2>();
         List<string> loadedBooksNames = new List<string>();
         List<Button> buttonsBook = new List<Button>();
+        List<string> pathsToBooks = new List<string>();
         Grid library = new Grid()
         {
             VerticalOptions = LayoutOptions.FillAndExpand,
@@ -63,14 +66,39 @@ namespace ReadS
             Priority = 0
         };
 
-
+        BinaryFormatter formatter = new BinaryFormatter();
+        static string filenameForBooks = Path.Combine(FileSystem.AppDataDirectory, "books.txt");
         public Books()
         {
             InitializeComponent();
 
+
+            try
+            {
+                using (StreamReader sr = new StreamReader(filenameForBooks, System.Text.Encoding.Default))
+                {
+                    string line;
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        pathsToBooks.Add(line);
+                    }
+                }
+                foreach (string item in pathsToBooks)
+                {
+                    string path = Path.Combine(Environment.CurrentDirectory, item);
+                    EpubBook newBook = EpubReader.ReadBook(new MemoryStream(File.ReadAllBytes(path)));
+                    books.Add(newBook.Title, newBook);
+                    LoadNewBook(newBook);
+                }
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("No file");
+            }
+
+
             this.ToolbarItems.Add(item);
             item.Clicked += LoadButtonClicked;
-
 
 
             Label noBook = new Label()
@@ -81,10 +109,13 @@ namespace ReadS
                 FontSize = 16,
                 Padding = 10
             };
-            Content = new StackLayout()
+            if (books.Count == 0)
             {
-                Children = { noBook }
-            };
+                Content = new StackLayout()
+                {
+                    Children = { noBook }
+                };
+            }
 
             #region How to load a text file embedded resource
 
@@ -139,7 +170,12 @@ namespace ReadS
                 Debug.WriteLine("File data: " + contents);
                 Console.WriteLine("File data: " + contents);
                 EpubBook newBook = EpubReader.ReadBook(new MemoryStream(fileData.DataArray));
-                books.Add(newBook.Title, newBook);
+                books.Add(newBook.Title, newBook); 
+ 
+                //using (StreamWriter sw = new StreamWriter(filenameForBooks, true, System.Text.Encoding.Default))
+                //{
+                //    sw.WriteLine(fileData.FilePath);
+                //}
                 LoadNewBook(newBook);
             }
             catch (Exception ex)

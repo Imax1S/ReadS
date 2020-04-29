@@ -54,46 +54,83 @@ namespace ReadS
 
             int counterPage = 1;
             int counterLetters = 0;
-            for (int i = 0; i < htmlCon.Length; i++)
+            List<string> words = htmlCon.Split().ToList();
+            //for (int i = 0; i < htmlCon.Length; i++)
+            //{
+            //    temp += htmlCon[i];
+            //    if (counterLetters == 950)
+            //    {
+            //        //Перенос по словам
+            //        //if (htmlCon[i] != ' ' && i < htmlCon.Length - 2 )
+            //        //{
+            //        //    temp = "";
+            //        //    while (htmlCon[i] != ' ')
+            //        //    {
+            //        //        i--;
+            //        //    }
+            //        //    for (int j = 0; j <= i; j++)
+            //        //    {
+            //        //        temp += htmlCon[j];
+            //        //    }
+            //        //}
+            //        //stacks.Add(new StackLayout()
+            //        //{
+            //        //    Children = {new Label(){
+            //        //            FontSize = 18,
+            //        //            TextType = TextType.Html,
+            //        //            Text = temp,
+            //        //            VerticalOptions = LayoutOptions.CenterAndExpand,
+            //        //            HorizontalOptions = LayoutOptions.CenterAndExpand,
+            //        //            Padding = 15,
+            //        //            TextColor = Color.Black,
+            //        //            FontFamily = "Kurale"},
+            //        //            new Label()
+            //        //            {
+            //        //            FontSize = 10,
+            //        //            Text = (counterPage++).ToString(),
+            //        //            VerticalOptions = LayoutOptions.Center,
+            //        //            HorizontalOptions = LayoutOptions.Center,
+            //        //            Padding = 10,
+            //        //            FontFamily = "Kurale"
+            //        //            }
+            //        //        }
+            //        //});
+            //        pages.Add(new ContentPage()
+            //        {
+            //            Content = new StackLayout()
+            //            {
+            //                Children = {new Label(){
+            //                    FontSize = 18,
+            //                    TextType = TextType.Html,
+            //                    Text = temp,
+            //                    VerticalOptions = LayoutOptions.CenterAndExpand,
+            //                    HorizontalOptions = LayoutOptions.CenterAndExpand,
+            //                    Padding = 15,
+            //                    TextColor = Color.Black,
+            //                    FontFamily = "Kurale"},
+            //                    new Label()
+            //                    {
+            //                    FontSize = 10,
+            //                    Text = (counterPage++).ToString(),
+            //                    VerticalOptions = LayoutOptions.Center,
+            //                    HorizontalOptions = LayoutOptions.Center,
+            //                    Padding = 10,
+            //                    FontFamily = "Kurale"
+            //                    }
+            //                }
+            //            }
+            //        });
+            //        counterLetters = 0;
+            //        temp = "";
+            //    }
+            //    counterLetters++;
+            //}
+
+            for (int i = 0; i < words.Count; i++)
             {
-                temp += htmlCon[i];
-                if (counterLetters == 950)
+                temp += words[i] + " ";
+                if (counterLetters == 125)
                 {
-                    //Перенос по словам
-                    //if (htmlCon[i] != ' ' && i < htmlCon.Length - 2 )
-                    //{
-                    //    temp = "";
-                    //    while (htmlCon[i] != ' ')
-                    //    {
-                    //        i--;
-                    //    }
-                    //    for (int j = 0; j <= i; j++)
-                    //    {
-                    //        temp += htmlCon[j];
-                    //    }
-                    //}
-                    //stacks.Add(new StackLayout()
-                    //{
-                    //    Children = {new Label(){
-                    //            FontSize = 18,
-                    //            TextType = TextType.Html,
-                    //            Text = temp,
-                    //            VerticalOptions = LayoutOptions.CenterAndExpand,
-                    //            HorizontalOptions = LayoutOptions.CenterAndExpand,
-                    //            Padding = 15,
-                    //            TextColor = Color.Black,
-                    //            FontFamily = "Kurale"},
-                    //            new Label()
-                    //            {
-                    //            FontSize = 10,
-                    //            Text = (counterPage++).ToString(),
-                    //            VerticalOptions = LayoutOptions.Center,
-                    //            HorizontalOptions = LayoutOptions.Center,
-                    //            Padding = 10,
-                    //            FontFamily = "Kurale"
-                    //            }
-                    //        }
-                    //});
                     pages.Add(new ContentPage()
                     {
                         Content = new StackLayout()
@@ -109,12 +146,12 @@ namespace ReadS
                                 FontFamily = "Kurale"},
                                 new Label()
                                 {
-                                FontSize = 10,
-                                Text = (counterPage++).ToString(),
-                                VerticalOptions = LayoutOptions.Center,
-                                HorizontalOptions = LayoutOptions.Center,
-                                Padding = 10,
-                                FontFamily = "Kurale"
+                                    FontSize = 10,
+                                    Text = (counterPage++).ToString(),
+                                    VerticalOptions = LayoutOptions.Center,
+                                    HorizontalOptions = LayoutOptions.Center,
+                                    Padding = 10,
+                                    FontFamily = "Kurale"
                                 }
                             }
                         }
