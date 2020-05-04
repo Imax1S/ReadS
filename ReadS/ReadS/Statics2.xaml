@@ -5,9 +5,10 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
              x:Class="ReadS.Statics2"
+            xmlns:local="clr-namespace:ReadS"
             Title="Статистика">
   <!--Pages can be added as references or inline-->
   <ContentPage Title="Месяцы" />
-  <ContentPage Title="Недели" />
-  <ContentPage Title="Дни" />
+  <local:Weeks Title="Недели" />
+  <local:Days Title="Дни" />
 </TabbedPage>

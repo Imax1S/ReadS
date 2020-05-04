@@ -170,12 +170,12 @@ namespace ReadS
                 Debug.WriteLine("File data: " + contents);
                 Console.WriteLine("File data: " + contents);
                 EpubBook newBook = EpubReader.ReadBook(new MemoryStream(fileData.DataArray));
-                books.Add(newBook.Title, newBook); 
- 
-                //using (StreamWriter sw = new StreamWriter(filenameForBooks, true, System.Text.Encoding.Default))
-                //{
-                //    sw.WriteLine(fileData.FilePath);
-                //}
+                books.Add(newBook.Title, newBook);
+
+                using (StreamWriter sw = new StreamWriter(filenameForBooks, true, System.Text.Encoding.Default))
+                {
+                    sw.WriteLine(fileData.FilePath);
+                }
                 LoadNewBook(newBook);
             }
             catch (Exception ex)

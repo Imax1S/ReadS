@@ -12,14 +12,18 @@ using Xamarin.Forms.Xaml;
 namespace ReadS
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
+    //Book View witch uses carusel view
     public partial class Book2 : CarouselPage
     {
+        //creating string for text and int for counting pages
         string htmlCon = "";
         public static int positionOfBook = 0;
         List<ContentPage> pages = new List<ContentPage>();
         //CarouselView carouselView = new CarouselView();
         List<StackLayout> stacks = new List<StackLayout>();
         int index = 1;
+
+        //Toolbar for resize text, search pages and style
         ToolbarItem item = new ToolbarItem
         {
             Text = "Шрифт",
@@ -55,77 +59,7 @@ namespace ReadS
             int counterPage = 1;
             int counterLetters = 0;
             List<string> words = htmlCon.Split().ToList();
-            //for (int i = 0; i < htmlCon.Length; i++)
-            //{
-            //    temp += htmlCon[i];
-            //    if (counterLetters == 950)
-            //    {
-            //        //Перенос по словам
-            //        //if (htmlCon[i] != ' ' && i < htmlCon.Length - 2 )
-            //        //{
-            //        //    temp = "";
-            //        //    while (htmlCon[i] != ' ')
-            //        //    {
-            //        //        i--;
-            //        //    }
-            //        //    for (int j = 0; j <= i; j++)
-            //        //    {
-            //        //        temp += htmlCon[j];
-            //        //    }
-            //        //}
-            //        //stacks.Add(new StackLayout()
-            //        //{
-            //        //    Children = {new Label(){
-            //        //            FontSize = 18,
-            //        //            TextType = TextType.Html,
-            //        //            Text = temp,
-            //        //            VerticalOptions = LayoutOptions.CenterAndExpand,
-            //        //            HorizontalOptions = LayoutOptions.CenterAndExpand,
-            //        //            Padding = 15,
-            //        //            TextColor = Color.Black,
-            //        //            FontFamily = "Kurale"},
-            //        //            new Label()
-            //        //            {
-            //        //            FontSize = 10,
-            //        //            Text = (counterPage++).ToString(),
-            //        //            VerticalOptions = LayoutOptions.Center,
-            //        //            HorizontalOptions = LayoutOptions.Center,
-            //        //            Padding = 10,
-            //        //            FontFamily = "Kurale"
-            //        //            }
-            //        //        }
-            //        //});
-            //        pages.Add(new ContentPage()
-            //        {
-            //            Content = new StackLayout()
-            //            {
-            //                Children = {new Label(){
-            //                    FontSize = 18,
-            //                    TextType = TextType.Html,
-            //                    Text = temp,
-            //                    VerticalOptions = LayoutOptions.CenterAndExpand,
-            //                    HorizontalOptions = LayoutOptions.CenterAndExpand,
-            //                    Padding = 15,
-            //                    TextColor = Color.Black,
-            //                    FontFamily = "Kurale"},
-            //                    new Label()
-            //                    {
-            //                    FontSize = 10,
-            //                    Text = (counterPage++).ToString(),
-            //                    VerticalOptions = LayoutOptions.Center,
-            //                    HorizontalOptions = LayoutOptions.Center,
-            //                    Padding = 10,
-            //                    FontFamily = "Kurale"
-            //                    }
-            //                }
-            //            }
-            //        });
-            //        counterLetters = 0;
-            //        temp = "";
-            //    }
-            //    counterLetters++;
-            //}
-
+            
             for (int i = 0; i < words.Count; i++)
             {
                 temp += words[i] + " ";

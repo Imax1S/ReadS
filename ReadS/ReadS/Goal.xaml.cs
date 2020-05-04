@@ -9,6 +9,7 @@ using Entry = Microcharts.Entry;
 using SkiaSharp;
 using System.IO;
 using Xamarin.Essentials;
+using Newtonsoft.Json;
 
 namespace ReadS
 {
@@ -20,7 +21,9 @@ namespace ReadS
         public static int pagesRead = 0;
         static Microcharts.Forms.ChartView StatsOfReading = new Microcharts.Forms.ChartView();
         //static string path = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
-        static string filename = Path.Combine(FileSystem.AppDataDirectory, "myfile.txt");
+        static string filenameGoal = Path.Combine(FileSystem.AppDataDirectory, "goals.txt");
+        static string filename = Path.Combine(FileSystem.AppDataDirectory, "stats.txt");
+        List<DayStat> dayStats = new List<DayStat>();
         List<Entry> entries = new List<Entry>
         {
             new Entry(Goal.goalPages)
@@ -34,7 +37,7 @@ namespace ReadS
             {
                 Color = SKColor.Parse("#0F9D58"),
                 Label = "Прочитано",
-                ValueLabel = (Goal.goalPages - 1).ToString()
+                ValueLabel = (Goal.goalPages).ToString()
             }
         };
         public Goal()
@@ -42,17 +45,33 @@ namespace ReadS
             InitializeComponent();
             try
             {
-                using (var streamReader = new StreamReader(filename))
+                using (StreamReader reader = new StreamReader(filename))
                 {
-                    string content = streamReader.ReadLine();
-                    string[] info = content.Split(':');
-                    goalPages = int.Parse(info[0]);
-                    pagesRead = int.Parse(info[1]);
+                    string json = reader.ReadToEnd();
+                    if (json != "")
+                    {
+                        dayStats = JsonConvert.DeserializeObject<List<DayStat>>(json);
+                        if (DateTime.Today == dayStats[dayStats.Count - 1].Date)
+                        {
+                            goalPages = dayStats[dayStats.Count - 1].Goal;
+                            pagesRead = dayStats[dayStats.Count - 1].Pages;
+                        }
+                        else
+                        {
+                            goalPages = 0;
+                            pagesRead = 0;
+                        }
+                    }
+                    else
+                    {
+                        goalPages = 0;
+                        pagesRead = 0;
+                    }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                Console.WriteLine("ad");
+                Console.WriteLine("Something went wrong");
             }
 
             Slider slider = new Slider
@@ -140,7 +159,7 @@ namespace ReadS
             },
 
             new Entry(pagesRead)
-            {
+            { 
                 Color = SKColor.Parse("#0F9D58"),
                 Label = "Прочитано",
                 ValueLabel = (pagesRead).ToString(),
@@ -153,10 +172,48 @@ namespace ReadS
 
         public static void SaveGoal()
         {
-            using (var streamWriter = new StreamWriter(filename, false))
+            //using (var streamWriter = new StreamWriter(filenameGoal, false))
+            //{
+            //    streamWriter.WriteLine(goalPages + ":" + pagesRead);
+            //}
+
+            List<DayStat> dayStats = new List<DayStat>();
+            try
             {
-                streamWriter.WriteLine(goalPages + ":" + pagesRead);
+                using (StreamReader reader = new StreamReader(filename))
+                {
+                    string json = reader.ReadToEnd();
+                    if (json != "")
+                    {
+                        dayStats = JsonConvert.DeserializeObject<List<DayStat>>(json);
+                    }
+                }
             }
+            catch (Exception)
+            {
+                Console.WriteLine("Не прочиталось");
+            }
+
+            if (dayStats.Count == 0)
+            {
+                dayStats.Add(new DayStat(pagesRead, DateTime.Today, goalPages));
+            }
+            else if (dayStats[dayStats.Count - 1].Date == DateTime.Today)
+            {
+                dayStats[dayStats.Count - 1].Pages = pagesRead;
+            }
+            else
+            {
+                dayStats.Add(new DayStat(pagesRead, DateTime.Today, goalPages));
+            }
+
+            using (StreamWriter writer = new StreamWriter(filename))
+            {
+                string json = JsonConvert.SerializeObject(dayStats);
+                writer.Write(json);
+            }
+
+            Days.fillDayGraph();
         }
     }
 }
