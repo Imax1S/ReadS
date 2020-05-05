@@ -24,22 +24,7 @@ namespace ReadS
         static string filenameGoal = Path.Combine(FileSystem.AppDataDirectory, "goals.txt");
         static string filename = Path.Combine(FileSystem.AppDataDirectory, "stats.txt");
         List<DayStat> dayStats = new List<DayStat>();
-        List<Entry> entries = new List<Entry>
-        {
-            new Entry(Goal.goalPages)
-            {
-                Color = SKColor.Parse("#4285F4"),
-                Label = "Осталось",
-                ValueLabel = Goal.goalPages.ToString()
-            },
-
-            new Entry(Goal.goalPages - pagesRead)
-            {
-                Color = SKColor.Parse("#0F9D58"),
-                Label = "Прочитано",
-                ValueLabel = (Goal.goalPages).ToString()
-            }
-        };
+        
         public Goal()
         {
             InitializeComponent();
@@ -69,7 +54,7 @@ namespace ReadS
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 Console.WriteLine("Something went wrong");
             }
@@ -151,11 +136,11 @@ namespace ReadS
         {
             List<Entry> entries = new List<Entry>
         {
-            new Entry(Goal.goalPages - pagesRead)
+            new Entry(goalPages - pagesRead)
             {
                 Color = SKColor.Parse("#4285F4"),
                 Label = "Осталось",
-                ValueLabel = (Goal.goalPages - pagesRead).ToString()
+                ValueLabel = (goalPages - pagesRead).ToString()
             },
 
             new Entry(pagesRead)
@@ -201,6 +186,7 @@ namespace ReadS
             else if (dayStats[dayStats.Count - 1].Date == DateTime.Today)
             {
                 dayStats[dayStats.Count - 1].Pages = pagesRead;
+                dayStats[dayStats.Count - 1].Goal = goalPages;
             }
             else
             {

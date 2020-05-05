@@ -7,8 +7,8 @@
              x:Class="ReadS.Statics2"
             xmlns:local="clr-namespace:ReadS"
             Title="Статистика">
-  <!--Pages can be added as references or inline-->
-  <ContentPage Title="Месяцы" />
-  <local:Weeks Title="Недели" />
-  <local:Days Title="Дни" />
+    <!--Pages can be added as references or inline-->
+    <local:Days Title="Дни" />
+    <local:Weeks Title="Недели" />
+    <local:Months Title="Месяцы" />
 </TabbedPage>

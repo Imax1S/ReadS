@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using VersFx.Formats.Text.Epub;
+using VersFx.Formats.Text.Epub.Schema.Navigation;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -45,10 +46,17 @@ namespace ReadS
 
             WebView webView = new WebView();
             webView.Source = htmlWebView;
-           // scroll.Content = label;
+            // scroll.Content = label;
+            EpubNavigation navigation = book.Schema.Navigation;
+            var what = navigation.PageList;
+            Label label = new Label();
+            foreach (var item in what)
+            {
+                label = new Label() { Text = item.Content.ToString() };
+            }
             Content = new StackLayout()
             {
-                Children = { webView }
+                Children = { label }
             };
         }
 

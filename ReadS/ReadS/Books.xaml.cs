@@ -29,7 +29,7 @@ namespace ReadS
         //Здесь хранятся книги и их названия
         Dictionary<string, EpubBook> books = new Dictionary<string, EpubBook>();
 
-        List<Book2> loadedBooks = new List<Book2>();
+        List<Book> loadedBooks = new List<Book>();
         List<string> loadedBooksNames = new List<string>();
         List<Button> buttonsBook = new List<Button>();
         List<string> pathsToBooks = new List<string>();
@@ -132,17 +132,6 @@ namespace ReadS
 
         private async void Book_Clicked(object sender, EventArgs e)
         {
-            if (loadedBooksNames.Contains((sender as Button).Text))
-            {
-                await Navigation.PushAsync(loadedBooks[loadedBooksNames.IndexOf((sender as Button).Text)]);
-            }
-            else
-            {
-                loadedBooksNames.Add((sender as Button).Text);
-                loadedBooks.Add(new Book2(books[(sender as Button).Text]));
-                await Navigation.PushAsync(loadedBooks[loadedBooks.Count - 1]);
-            }
-
             //if (loadedBooksNames.Contains((sender as Button).Text))
             //{
             //    await Navigation.PushAsync(loadedBooks[loadedBooksNames.IndexOf((sender as Button).Text)]);
@@ -150,9 +139,20 @@ namespace ReadS
             //else
             //{
             //    loadedBooksNames.Add((sender as Button).Text);
-            //    loadedBooks.Add(new Book(books[(sender as Button).Text]));
+            //    loadedBooks.Add(new Book2(books[(sender as Button).Text]));
             //    await Navigation.PushAsync(loadedBooks[loadedBooks.Count - 1]);
             //}
+
+            if (loadedBooksNames.Contains((sender as Button).Text))
+            {
+                await Navigation.PushAsync(loadedBooks[loadedBooksNames.IndexOf((sender as Button).Text)]);
+            }
+            else
+            {
+                loadedBooksNames.Add((sender as Button).Text);
+                loadedBooks.Add(new Book(books[(sender as Button).Text]));
+                await Navigation.PushAsync(loadedBooks[loadedBooks.Count - 1]);
+            }
         }
         async void LoadButtonClicked(object sender, EventArgs e)
         {

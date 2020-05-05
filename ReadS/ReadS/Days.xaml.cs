@@ -19,26 +19,18 @@ namespace ReadS
         static List<DayStat> dayStats = new List<DayStat>();
         static Microcharts.Forms.ChartView StatsOfReadingByDates = new Microcharts.Forms.ChartView();
         static string filename = Path.Combine(FileSystem.AppDataDirectory, "stats.txt");
-        static List<Entry> entries = new List<Entry>();
-        Random random = new Random();
         ScrollView scroll = new ScrollView()
         {
-            Orientation = ScrollOrientation.Horizontal
+            Orientation = ScrollOrientation.Horizontal,
+            //FlowDirection = FlowDirection.RightToLeft,
         };
         public Days()
         {
             InitializeComponent();
-            for (int i = 0; i < 7; i++)
-            {
-                entries.Add(new Entry(random.Next(0, 100))
-                {
-                    Color = SKColor.Parse("#4285F4"),
-                    Label = new DateTime(2020, 5, i + 1).ToString(),
-                });
-            }
-            
+
             fillDayGraph();
-            scroll.Content = StatsOfReadingByDates;
+            scroll.Content = StatsOfReadingByDates; 
+       
             Content = new StackLayout()
             {
                 Children = { scroll }
@@ -47,7 +39,8 @@ namespace ReadS
 
         static public void fillDayGraph()
         {
-
+            Random random = new Random();
+            List<Entry> entries = new List<Entry>();
             try
             {
                 using (StreamReader reader = new StreamReader(filename))
@@ -56,14 +49,27 @@ namespace ReadS
                     dayStats = JsonConvert.DeserializeObject<List<DayStat>>(json);
                 }
 
+                for (int i = 0; i < 7; i++)
+                {
+                    int ran = random.Next(0, 100);
+                    entries.Add(new Entry(ran)
+                    {
+                        Color = SKColor.Parse("#4285F4"),
+                        Label = new DateTime(2020, 5, i + 1).ToString(),
+                        ValueLabel = ran.ToString(),
+                    });
+                }
+
                 foreach (DayStat day in dayStats)
                 {
                     entries.Add(new Entry(day.Pages)
                     {
                         Color = SKColor.Parse("#4285F4"),
                         Label = day.Date.ToString(),
+                        ValueLabel = day.Pages.ToString(),
                     });
                 }
+
                 StatsOfReadingByDates.HeightRequest = 200;
                 StatsOfReadingByDates.WidthRequest = 100 * entries.Count;
                 StatsOfReadingByDates.HorizontalOptions = LayoutOptions.End;
@@ -81,14 +87,7 @@ namespace ReadS
                     FontSize = 16,
                     Padding = 10
                 };
-
-                //Content = new StackLayout()
-                //{
-                //    Children = { noStat }
-                //};
-
             }
-
         }
     }
 }

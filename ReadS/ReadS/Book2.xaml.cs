@@ -110,7 +110,7 @@ namespace ReadS
 
         public string readBook(EpubBook book)
         {
-            Label label;
+            
             string chapterHtmlContent = "";
             foreach (EpubChapter chapter in book.Chapters)
             {
@@ -144,6 +144,7 @@ namespace ReadS
                 Goal.SaveGoal();
                 Goal.RefreshGoalGraph();
                 index = Children.IndexOf(CurrentPage);
+                
             }
         }
     }
