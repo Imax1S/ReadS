@@ -21,6 +21,7 @@ namespace ReadS
         List<ContentPage> pages = new List<ContentPage>();
         //CarouselView carouselView = new CarouselView();
         List<StackLayout> stacks = new List<StackLayout>();
+        List<WebView> webViews = new List<WebView>();
         int index = 1;
 
         //Toolbar for resize text, search pages and style
@@ -59,7 +60,7 @@ namespace ReadS
             int counterPage = 1;
             int counterLetters = 0;
             List<string> words = htmlCon.Split().ToList();
-            
+            List<StackLayout> layout = new List<StackLayout>();
             for (int i = 0; i < words.Count; i++)
             {
                 temp += words[i] + " ";
@@ -78,6 +79,7 @@ namespace ReadS
                                 Padding = 15,
                                 TextColor = Color.Black,
                                 FontFamily = "Kurale"},
+                                
                                 new Label()
                                 {
                                     FontSize = 10,
@@ -90,16 +92,72 @@ namespace ReadS
                             }
                         }
                     });
+                    //layout.Add(new StackLayout()
+                    //{
+                    //    Children = {new Label(){
+                    //            FontSize = 18,
+                    //            TextType = TextType.Html,
+                    //            Text = temp,
+                    //            VerticalOptions = LayoutOptions.CenterAndExpand,
+                    //            HorizontalOptions = LayoutOptions.CenterAndExpand,
+                    //            Padding = 15,
+                    //            TextColor = Color.Black,
+                    //            FontFamily = "Kurale"},
+
+                    //            new Label()
+                    //            {
+                    //                FontSize = 10,
+                    //                Text = (counterPage++).ToString(),
+                    //                VerticalOptions = LayoutOptions.Center,
+                    //                HorizontalOptions = LayoutOptions.Center,
+                    //                Padding = 10,
+                    //                FontFamily = "Kurale"
+                    //            }
+                    //        }
+                    //});
+                    var htmlSource = new HtmlWebViewSource();
+                    htmlSource.Html = temp;
+
+
+                    webViews.Add(new WebView()
+                    {
+                        Source = htmlSource,
+                        
+                    });
                     counterLetters = 0;
                     temp = "";
                 }
                 counterLetters++;
             }
 
-            foreach (ContentPage item in pages)
+
+            //CarouselView carousel = new CarouselView()
+            //{
+            //    ItemsLayout = new LinearItemsLayout(ItemsLayoutOrientation.Vertical)
+            //    {
+            //        ItemSpacing = 20
+            //    }
+            //};
+            //carousel.ItemsSource = layout;
+            //ContentPage contentPage = new ContentPage() { Content = carousel };
+            //this.Children.Add(contentPage);
+
+
+            //foreach (ContentPage item in pages)
+            //{
+            //    this.Children.Add(item);
+            //}
+            this.Children.Add(new ContentPage()
             {
-                //carouselView.AddLogicalChild(item);
-                this.Children.Add(item);
+                Content = new ImageButton()
+                {
+                    Source = image.Source
+                }
+            });
+
+            foreach (WebView item in webViews)
+            {
+                this.Children.Add(new ContentPage() { Content = item});
             }
             //ContentPage page = new ContentPage();
             //StackLayout stackLayout = new StackLayout();
@@ -128,6 +186,10 @@ namespace ReadS
                     htmlCon = chapter.HtmlContent;
                 }
             }
+
+            
+
+
             //label = new Label();
             //label.Text = chapterHtmlContent;
             //label.FontSize = 15;

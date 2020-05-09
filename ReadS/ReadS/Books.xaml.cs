@@ -29,7 +29,8 @@ namespace ReadS
         //Здесь хранятся книги и их названия
         Dictionary<string, EpubBook> books = new Dictionary<string, EpubBook>();
 
-        List<Book> loadedBooks = new List<Book>();
+        //List<Book> loadedBooks = new List<Book>();
+        List<Book2> loadedBooks = new List<Book2>();
         List<string> loadedBooksNames = new List<string>();
         List<Button> buttonsBook = new List<Button>();
         List<string> pathsToBooks = new List<string>();
@@ -46,9 +47,11 @@ namespace ReadS
             ColumnDefinitions =
                 {
                     new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
-                    new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                    new ColumnDefinition { Width = new GridLength(2, GridUnitType.Star) },
                    // new ColumnDefinition { Width = new GridLength(100, GridUnitType.Absolute) }
-                }
+                },
+            ColumnSpacing = 1,
+            RowSpacing = 10
         };
 
         //Скролл для кнопок
@@ -66,7 +69,7 @@ namespace ReadS
             Priority = 0
         };
 
-        BinaryFormatter formatter = new BinaryFormatter();
+
         static string filenameForBooks = Path.Combine(FileSystem.AppDataDirectory, "books.txt");
         public Books()
         {
@@ -85,9 +88,9 @@ namespace ReadS
                 }
                 foreach (string item in pathsToBooks)
                 {
-                    string path = Path.Combine(Environment.CurrentDirectory, item);
+                    string path = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal), item); 
                     EpubBook newBook = EpubReader.ReadBook(new MemoryStream(File.ReadAllBytes(path)));
-                    books.Add(newBook.Title, newBook);
+                    books.Add(newBook.Title + Environment.NewLine + newBook.Author, newBook);
                     LoadNewBook(newBook);
                 }
             }
@@ -132,17 +135,6 @@ namespace ReadS
 
         private async void Book_Clicked(object sender, EventArgs e)
         {
-            //if (loadedBooksNames.Contains((sender as Button).Text))
-            //{
-            //    await Navigation.PushAsync(loadedBooks[loadedBooksNames.IndexOf((sender as Button).Text)]);
-            //}
-            //else
-            //{
-            //    loadedBooksNames.Add((sender as Button).Text);
-            //    loadedBooks.Add(new Book2(books[(sender as Button).Text]));
-            //    await Navigation.PushAsync(loadedBooks[loadedBooks.Count - 1]);
-            //}
-
             if (loadedBooksNames.Contains((sender as Button).Text))
             {
                 await Navigation.PushAsync(loadedBooks[loadedBooksNames.IndexOf((sender as Button).Text)]);
@@ -150,31 +142,44 @@ namespace ReadS
             else
             {
                 loadedBooksNames.Add((sender as Button).Text);
-                loadedBooks.Add(new Book(books[(sender as Button).Text]));
+                loadedBooks.Add(new Book2(books[(sender as Button).Text]));
                 await Navigation.PushAsync(loadedBooks[loadedBooks.Count - 1]);
             }
+
+            //if (loadedBooksNames.Contains((sender as Button).Text))
+            //{
+            //    await Navigation.PushAsync(loadedBooks[loadedBooksNames.IndexOf((sender as Button).Text)]);
+            //}
+            //else
+            //{
+            //    loadedBooksNames.Add((sender as Button).Text);
+            //    loadedBooks.Add(new Book(books[(sender as Button).Text]));
+            //    await Navigation.PushAsync(loadedBooks[loadedBooks.Count - 1]);
+            //}
         }
         async void LoadButtonClicked(object sender, EventArgs e)
         {
+            ProgressBar progressBar = new ProgressBar() { Progress = .2 };
             try
             {
                 string[] types = new string[] { ".epub" };
                 FileData fileData = await CrossFilePicker.Current.PickFile(allowedTypes: types);
                 if (fileData == null)
                     return; // user canceled file picking
-
+                //await progressBar.ProgressTo(.8, 250, Easing.Linear);
                 string fileName = fileData.FileName;
                 string contents = System.Text.Encoding.UTF8.GetString(fileData.DataArray);
+                //var pathFile = Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDownloads);
 
                 Console.WriteLine("File name chosen: " + fileName);
                 Debug.WriteLine("File data: " + contents);
                 Console.WriteLine("File data: " + contents);
                 EpubBook newBook = EpubReader.ReadBook(new MemoryStream(fileData.DataArray));
-                books.Add(newBook.Title, newBook);
+                books.Add(newBook.Title + Environment.NewLine + newBook.Author, newBook);
 
                 using (StreamWriter sw = new StreamWriter(filenameForBooks, true, System.Text.Encoding.Default))
                 {
-                    sw.WriteLine(fileData.FilePath);
+                    sw.WriteLine(fileData.GetStream());
                 }
                 LoadNewBook(newBook);
             }
@@ -186,21 +191,26 @@ namespace ReadS
 
         public void LoadNewBook(EpubBook book)
         {
-
+            
             Button book_button = new Button()
             {
-                //ContentLayout = new Button.ButtonContentLayout(Button.ButtonContentLayout.ImagePosition.Right , 0)
+               // ContentLayout = new Button.ButtonContentLayout(Button.ButtonContentLayout.ImagePosition.Left , 10),
+                WidthRequest = 100,
+                HeightRequest = 100,
+                BackgroundColor = Color.White,
             };
-            book_button.Text = book.Title;
+            book_button.Text = book.Title + Environment.NewLine + book.Author;
             book_button.Clicked += Book_Clicked;
             //book_button.ImageSource = ImageSource.FromStream(() => new MemoryStream(book.CoverImage));
 
             buttonsBook.Add(book_button);
             ImageButton image = new ImageButton();
             image.Source = ImageSource.FromStream(() => new MemoryStream(book.CoverImage));
+            image.BackgroundColor = Color.White;
+            image.CornerRadius = 50;
             library.RowDefinitions.Add(new RowDefinition { Height = new GridLength(100, GridUnitType.Absolute) });
-
             library.Children.Add(buttonsBook[buttonsBook.Count - 1], 1, buttonsBook.Count - 1);
+
             library.Children.Add(image, 0, buttonsBook.Count - 1);
 
             scroll.Content = library;

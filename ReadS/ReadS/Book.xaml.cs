@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using VersFx.Formats.Text.Epub;
 using VersFx.Formats.Text.Epub.Schema.Navigation;
 using Xamarin.Forms;
@@ -19,6 +20,8 @@ namespace ReadS
         //Label label;
         string htmlCon = "";
         public static int positionOfBook = 0;
+        WebView webView;
+        Entry urlEntry;
         public Book(EpubBook book)
         {
             InitializeComponent();
@@ -39,25 +42,34 @@ namespace ReadS
             //    Orientation = ScrollOrientation.Vertical
             //};
 
-            var htmlWebView = new HtmlWebViewSource();
-            htmlWebView.Html = @readBook(book);
+            urlEntry = new Entry { HorizontalOptions = LayoutOptions.FillAndExpand };
+            Button button = new Button { Text = "Go" };
 
-            //htmlWebView.Html = htmlCon;
-
-            WebView webView = new WebView();
-            webView.Source = htmlWebView;
-            // scroll.Content = label;
-            EpubNavigation navigation = book.Schema.Navigation;
-            var what = navigation.PageList;
-            Label label = new Label();
-            foreach (var item in what)
+            StackLayout stack = new StackLayout
             {
-                label = new Label() { Text = item.Content.ToString() };
-            }
-            Content = new StackLayout()
-            {
-                Children = { label }
+                Orientation = StackOrientation.Horizontal,
+                Children = { button, urlEntry }
             };
+
+            var htmlSource = new HtmlWebViewSource();
+            StringWriter myWriter = new StringWriter();
+
+            HttpUtility.HtmlDecode(readBook(book), myWriter);
+            //htmlSource.Html = book;
+
+            webView = new WebView
+            {
+                //Source = new UrlWebViewSource { Url = "http://blog.xamarin.com/" },
+                // или так
+                Source = htmlSource,
+                VerticalOptions = LayoutOptions.FillAndExpand,
+
+            };
+
+            
+
+
+            this.Content = new StackLayout { Children = { stack, webView } };
         }
 
         public string readBook(EpubBook book)
@@ -78,18 +90,18 @@ namespace ReadS
                     chapterHtmlContent += item.HtmlContent;
                     htmlCon = chapter.HtmlContent;
                 }
-            } 
-            return chapterHtmlContent;
+            }
+            return htmlCon;
         }
-          
+
         public void rightClick(object sender, EventArgs e)
         {
             positionOfBook += 770;
             Goal.pagesRead++;
-           // scroll.ScrollToAsync(0, positionOfBook, false); //scrolls so that the position at 150px from the top is visible
+            // scroll.ScrollToAsync(0, positionOfBook, false); //scrolls so that the position at 150px from the top is visible
             Goal.pagesRead += 1;
             Goal.RefreshGoalGraph();
-        } 
+        }
 
         public void leftClick(object sender, EventArgs e)
         {

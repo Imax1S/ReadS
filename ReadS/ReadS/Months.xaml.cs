@@ -56,12 +56,18 @@ namespace ReadS
             }
 
             fillMonthGraph();
+            StatsOfReadingByDates.HeightRequest = 200;
+            StatsOfReadingByDates.WidthRequest = 100 * entries.Count;
+            StatsOfReadingByDates.HorizontalOptions = LayoutOptions.End;
+            StatsOfReadingByDates.VerticalOptions = LayoutOptions.End;
+            StatsOfReadingByDates.Chart = new Microcharts.LineChart { Entries = entries, LabelTextSize = 40, BackgroundColor = SKColor.Parse("#FFFFFF") };
+
             scroll.Content = StatsOfReadingByDates;
             Content = new StackLayout()
             {
                 Children = { scroll }
             };
-        }
+        }   
 
         public void fillMonthGraph()
         {

@@ -49,7 +49,7 @@ namespace ReadS
                     dayStats = JsonConvert.DeserializeObject<List<DayStat>>(json);
                 }
 
-                for (int i = 0; i < 7; i++)
+                for (int i = 0; i < 3; i++)
                 {
                     int ran = random.Next(0, 100);
                     entries.Add(new Entry(ran)
