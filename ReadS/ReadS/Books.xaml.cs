@@ -27,10 +27,10 @@ namespace ReadS
         //public ObservableCollection<string> tems { get; set; }
 
         //Здесь хранятся книги и их названия
-        Dictionary<string, EpubBook> books = new Dictionary<string, EpubBook>();
+        static public Dictionary<string, EpubBook> books = new Dictionary<string, EpubBook>();
 
-        //List<Book> loadedBooks = new List<Book>();
-        List<Book2> loadedBooks = new List<Book2>();
+        List<Book> loadedBooks = new List<Book>();
+        //List<Book2> loadedBooks = new List<Book2>();
         List<string> loadedBooksNames = new List<string>();
         List<Button> buttonsBook = new List<Button>();
         List<string> pathsToBooks = new List<string>();
@@ -75,7 +75,6 @@ namespace ReadS
         {
             InitializeComponent();
 
-
             try
             {
                 using (StreamReader sr = new StreamReader(filenameForBooks, System.Text.Encoding.Default))
@@ -88,8 +87,9 @@ namespace ReadS
                 }
                 foreach (string item in pathsToBooks)
                 {
-                    string path = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal), item); 
-                    EpubBook newBook = EpubReader.ReadBook(new MemoryStream(File.ReadAllBytes(path)));
+                    string path = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal), item);
+
+                    EpubBook newBook = EpubReader.ReadBook(new MemoryStream(File.ReadAllBytes(item)));
                     books.Add(newBook.Title + Environment.NewLine + newBook.Author, newBook);
                     LoadNewBook(newBook);
                 }
@@ -112,6 +112,8 @@ namespace ReadS
                 FontSize = 16,
                 Padding = 10
             };
+
+            this.Padding = new Thickness(0, Device.OnPlatform(20, 20, 0), 10, 0);
             if (books.Count == 0)
             {
                 Content = new StackLayout()
@@ -135,17 +137,6 @@ namespace ReadS
 
         private async void Book_Clicked(object sender, EventArgs e)
         {
-            if (loadedBooksNames.Contains((sender as Button).Text))
-            {
-                await Navigation.PushAsync(loadedBooks[loadedBooksNames.IndexOf((sender as Button).Text)]);
-            }
-            else
-            {
-                loadedBooksNames.Add((sender as Button).Text);
-                loadedBooks.Add(new Book2(books[(sender as Button).Text]));
-                await Navigation.PushAsync(loadedBooks[loadedBooks.Count - 1]);
-            }
-
             //if (loadedBooksNames.Contains((sender as Button).Text))
             //{
             //    await Navigation.PushAsync(loadedBooks[loadedBooksNames.IndexOf((sender as Button).Text)]);
@@ -153,9 +144,20 @@ namespace ReadS
             //else
             //{
             //    loadedBooksNames.Add((sender as Button).Text);
-            //    loadedBooks.Add(new Book(books[(sender as Button).Text]));
+            //    loadedBooks.Add(new Book2(books[(sender as Button).Text]));
             //    await Navigation.PushAsync(loadedBooks[loadedBooks.Count - 1]);
             //}
+
+            if (loadedBooksNames.Contains((sender as Button).Text))
+            {
+                await Navigation.PushAsync(loadedBooks[loadedBooksNames.IndexOf((sender as Button).Text)]);
+            }
+            else
+            {
+                loadedBooksNames.Add((sender as Button).Text);
+                loadedBooks.Add(new Book(books[(sender as Button).Text]));
+                await Navigation.PushAsync(loadedBooks[loadedBooks.Count - 1]);
+            }
         }
         async void LoadButtonClicked(object sender, EventArgs e)
         {
@@ -177,9 +179,10 @@ namespace ReadS
                 EpubBook newBook = EpubReader.ReadBook(new MemoryStream(fileData.DataArray));
                 books.Add(newBook.Title + Environment.NewLine + newBook.Author, newBook);
 
+                string path = fileData.FilePath;
                 using (StreamWriter sw = new StreamWriter(filenameForBooks, true, System.Text.Encoding.Default))
                 {
-                    sw.WriteLine(fileData.GetStream());
+                    sw.WriteLine(path);
                 }
                 LoadNewBook(newBook);
             }
@@ -191,10 +194,10 @@ namespace ReadS
 
         public void LoadNewBook(EpubBook book)
         {
-            
+
             Button book_button = new Button()
             {
-               // ContentLayout = new Button.ButtonContentLayout(Button.ButtonContentLayout.ImagePosition.Left , 10),
+                // ContentLayout = new Button.ButtonContentLayout(Button.ButtonContentLayout.ImagePosition.Left , 10),
                 WidthRequest = 100,
                 HeightRequest = 100,
                 BackgroundColor = Color.White,
@@ -208,6 +211,8 @@ namespace ReadS
             image.Source = ImageSource.FromStream(() => new MemoryStream(book.CoverImage));
             image.BackgroundColor = Color.White;
             image.CornerRadius = 50;
+
+
             library.RowDefinitions.Add(new RowDefinition { Height = new GridLength(100, GridUnitType.Absolute) });
             library.Children.Add(buttonsBook[buttonsBook.Count - 1], 1, buttonsBook.Count - 1);
 

@@ -22,33 +22,56 @@ namespace ReadS
         static List<DayStat> dayStats = new List<DayStat>();
         static Microcharts.Forms.ChartView StatsOfReadingByDates = new Microcharts.Forms.ChartView();
         static string filename = Path.Combine(FileSystem.AppDataDirectory, "stats.txt");
-        static List<Entry> entries = new List<Entry>();
         Random random = new Random();
         ScrollView scroll = new ScrollView()
         {
             Orientation = ScrollOrientation.Horizontal
         };
+        static Dictionary<int, string> namesOfMonths = new Dictionary<int, string> {
+            {1, "Январь" },
+            {2, "Февраль" } ,
+            {3, "Март" },
+            {4, "Апрель" },
+            {5, "Май" },
+            {6, "Июнь" },
+            {7, "Июль" },
+            {8, "Август" },
+            {9, "Сентябрь" },
+            {10, "Октябрь" },
+            {11, "Ноябрь" },
+            {12, "Декабрь" },
+        };
         public Weeks()
         {
             InitializeComponent();
-            for (int i = 0; i < 3; i++)
-            {
-                entries.Add(new Entry(random.Next(200, 700))
-                {
-                    Color = SKColor.Parse("#4285F4"),
-                });
-            }
+            //for (int i = 0; i < 3; i++)
+            //{
+            //    entries.Add(new Entry(random.Next(200, 700))
+            //    {
+            //        Color = SKColor.Parse("#4285F4"),
+            //    });
+            //}
 
             fillWeekGraph();
             scroll.Content = StatsOfReadingByDates;
+
+            Label header = new Label
+            {
+                Text = namesOfMonths[dayStats[0].Date.Month],
+                FontSize = 40,
+                HorizontalOptions = LayoutOptions.Center,
+                Padding = 20,
+            };
+            this.Padding = new Thickness(10, Device.OnPlatform(20, 20, 0), 10, 5);
             Content = new StackLayout()
             {
-                Children = { scroll }
+                Children = { header, scroll }
             };
         }
 
-        public void fillWeekGraph()
+        static public void fillWeekGraph()
         {
+            List<Entry> entries = new List<Entry>();
             try
             {
                 using (StreamReader reader = new StreamReader(filename))
@@ -66,15 +89,15 @@ namespace ReadS
                     days.Add(dayStats[i]);
                     if (dayStats[i].Date.DayOfWeek == DayOfWeek.Sunday)
                     {
-                        period = days[0].Date + "-" + days[days.Count - 1].Date;
+                        period = days[0].Date.Day + "-" + days[days.Count - 1].Date.Day;
                         weekStats.Add(new Classes_For_Stats.WeekStat(days, period));
-                        days = null;
+                        days = new List<DayStat>();
                     }
                 }
 
-                if (days != null)
+                if (days.Count != 0)
                 {
-                    period = days[0].Date + "-" + days[days.Count - 1].Date;
+                    period = days[0].Date.Day + "-" + days[days.Count - 1].Date.Day;
                     weekStats.Add(new Classes_For_Stats.WeekStat(days, period));
                 }
 
@@ -88,7 +111,7 @@ namespace ReadS
                     });
                 }
 
-                StatsOfReadingByDates.HeightRequest = 200;
+                StatsOfReadingByDates.HeightRequest = 300;
                 StatsOfReadingByDates.WidthRequest = 100 * entries.Count;
                 StatsOfReadingByDates.HorizontalOptions = LayoutOptions.End;
                 StatsOfReadingByDates.VerticalOptions = LayoutOptions.End;
@@ -104,11 +127,6 @@ namespace ReadS
                     HorizontalOptions = LayoutOptions.CenterAndExpand,
                     FontSize = 16,
                     Padding = 10
-                };
-
-                Content = new StackLayout()
-                {
-                    Children = { noStat }
                 };
             }
         }

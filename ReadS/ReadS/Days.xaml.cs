@@ -24,16 +24,39 @@ namespace ReadS
             Orientation = ScrollOrientation.Horizontal,
             //FlowDirection = FlowDirection.RightToLeft,
         };
+        Dictionary<int, string> namesOfMonths = new Dictionary<int, string> {
+            {1, "Январь" },
+            {2, "Февраль" } ,
+            {3, "Март" },
+            {4, "Апрель" },
+            {5, "Май" },
+            {6, "Июнь" },
+            {7, "Июль" },
+            {8, "Август" },
+            {9, "Сентябрь" },
+            {10, "Октябрь" },
+            {11, "Ноябрь" },
+            {12, "Декабрь" },
+        };
         public Days()
         {
             InitializeComponent();
 
             fillDayGraph();
-            scroll.Content = StatsOfReadingByDates; 
-       
+            scroll.Content = StatsOfReadingByDates;
+            scroll.VerticalOptions = LayoutOptions.Center;
+            scroll.HorizontalOptions = LayoutOptions.Center;
+            Label header = new Label
+            {
+                Text = namesOfMonths[dayStats[0].Date.Month],
+                FontSize = 40,
+                HorizontalOptions = LayoutOptions.Center,
+                Padding = 20,
+            };
+            this.Padding = new Thickness(10, Device.OnPlatform(20, 20, 0), 10, 5);
             Content = new StackLayout()
             {
-                Children = { scroll }
+                Children = { header, scroll }
             };
         }
 
@@ -49,31 +72,30 @@ namespace ReadS
                     dayStats = JsonConvert.DeserializeObject<List<DayStat>>(json);
                 }
 
-                for (int i = 0; i < 3; i++)
-                {
-                    int ran = random.Next(0, 100);
-                    entries.Add(new Entry(ran)
-                    {
-                        Color = SKColor.Parse("#4285F4"),
-                        Label = new DateTime(2020, 5, i + 1).ToString(),
-                        ValueLabel = ran.ToString(),
-                    });
-                }
+                //for (int i = 0; i < 3; i++)
+                //{
+                //    int ran = random.Next(0, 100);
+                //    entries.Add(new Entry(ran)
+                //    {
+                //        Color = SKColor.Parse("#4285F4"),
+                //        Label = new DateTime(2020, 5, i + 1).ToString(),
+                //        ValueLabel = ran.ToString(),
+                //    });
+                //}
 
                 foreach (DayStat day in dayStats)
                 {
                     entries.Add(new Entry(day.Pages)
                     {
                         Color = SKColor.Parse("#4285F4"),
-                        Label = day.Date.ToString(),
+                        Label = day.Date.Day.ToString(),
                         ValueLabel = day.Pages.ToString(),
                     });
                 }
 
-                StatsOfReadingByDates.HeightRequest = 200;
+                StatsOfReadingByDates.HeightRequest = 300;
                 StatsOfReadingByDates.WidthRequest = 100 * entries.Count;
-                StatsOfReadingByDates.HorizontalOptions = LayoutOptions.End;
-                StatsOfReadingByDates.VerticalOptions = LayoutOptions.End;
+
                 StatsOfReadingByDates.Chart = new Microcharts.LineChart { Entries = entries, LabelTextSize = 40, BackgroundColor = SKColor.Parse("#FFFFFF") };
             }
             catch (Exception ex)

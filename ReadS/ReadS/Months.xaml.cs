@@ -19,13 +19,12 @@ namespace ReadS
         static List<DayStat> dayStats = new List<DayStat>();
         static Microcharts.Forms.ChartView StatsOfReadingByDates = new Microcharts.Forms.ChartView();
         static string filename = Path.Combine(FileSystem.AppDataDirectory, "stats.txt");
-        static List<Entry> entries = new List<Entry>();
         Random random = new Random();
         ScrollView scroll = new ScrollView()
         {
             Orientation = ScrollOrientation.Horizontal
         };
-        Dictionary<int, string> namesOfMonths = new Dictionary<int, string> {
+        static Dictionary<int, string> namesOfMonths = new Dictionary<int, string> {
             {1, "Январь" },
             {2, "Февраль" } ,
             {3, "Март" },
@@ -44,33 +43,41 @@ namespace ReadS
         public Months()
         {
             InitializeComponent();
-            for (int i = 0; i < 3; i++)
-            {
-                int ran = random.Next(200, 3000);
-                entries.Add(new Entry(ran)
-                {
-                    Color = SKColor.Parse("#4285F4"),
-                    Label = namesOfMonths[i + 1],
-                    ValueLabel = ran.ToString(),
-                });
-            }
+            //for (int i = 0; i < 3; i++)
+            //{
+            //    int ran = random.Next(200, 3000);
+            //    entries.Add(new Entry(ran)
+            //    {
+            //        Color = SKColor.Parse("#4285F4"),
+            //        Label = namesOfMonths[i + 1],
+            //        ValueLabel = ran.ToString(),
+            //    });
+            //}
 
             fillMonthGraph();
-            StatsOfReadingByDates.HeightRequest = 200;
-            StatsOfReadingByDates.WidthRequest = 100 * entries.Count;
-            StatsOfReadingByDates.HorizontalOptions = LayoutOptions.End;
-            StatsOfReadingByDates.VerticalOptions = LayoutOptions.End;
-            StatsOfReadingByDates.Chart = new Microcharts.LineChart { Entries = entries, LabelTextSize = 40, BackgroundColor = SKColor.Parse("#FFFFFF") };
-
+            //StatsOfReadingByDates.HeightRequest = 300;
+            //StatsOfReadingByDates.WidthRequest = 100 * entries.Count;
+            //StatsOfReadingByDates.HorizontalOptions = LayoutOptions.End;
+            //StatsOfReadingByDates.VerticalOptions = LayoutOptions.End;
+            //StatsOfReadingByDates.Chart = new Microcharts.LineChart { Entries = entries, LabelTextSize = 40, BackgroundColor = SKColor.Parse("#FFFFFF") };
+            Label header = new Label
+            {
+                Text = dayStats[0].Date.Year.ToString(),
+                FontSize = 40,
+                HorizontalOptions = LayoutOptions.Center,
+                Padding = 20,
+            };
+            this.Padding = new Thickness(10, Device.OnPlatform(20, 20, 0), 10, 5);
             scroll.Content = StatsOfReadingByDates;
             Content = new StackLayout()
             {
-                Children = { scroll }
+                Children = {header, scroll }
             };
-        }   
+        }
 
-        public void fillMonthGraph()
+        static public void fillMonthGraph()
         {
+            List<Entry> entries = new List<Entry>();
             try
             {
                 using (StreamReader reader = new StreamReader(filename))
@@ -92,6 +99,7 @@ namespace ReadS
                         days = null;
                     }
                 }
+
                 if (days != null)
                 {
                     monthStats.Add(new Classes_For_Stats.MonthStat(days, namesOfMonths[days[0].Date.Month]));
@@ -107,7 +115,7 @@ namespace ReadS
                     });
                 }
 
-                StatsOfReadingByDates.HeightRequest = 200;
+                StatsOfReadingByDates.HeightRequest = 300;
                 StatsOfReadingByDates.WidthRequest = 100 * entries.Count;
                 StatsOfReadingByDates.HorizontalOptions = LayoutOptions.End;
                 StatsOfReadingByDates.VerticalOptions = LayoutOptions.End;
@@ -123,11 +131,6 @@ namespace ReadS
                     HorizontalOptions = LayoutOptions.CenterAndExpand,
                     FontSize = 16,
                     Padding = 10
-                };
-
-                Content = new StackLayout()
-                {
-                    Children = { noStat }
                 };
             }
         }

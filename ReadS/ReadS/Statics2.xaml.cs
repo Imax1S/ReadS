@@ -25,13 +25,13 @@ namespace ReadS
             JsonSerializer serializer = new JsonSerializer();
             serializer.Converters.Add(new JavaScriptDateTimeConverter());
             serializer.NullValueHandling = NullValueHandling.Ignore;
-
-
         }
-        
-        public void fillGraph()
-        {
 
+        static public void fillGraph()
+        {
+            Days.fillDayGraph();
+            Weeks.fillWeekGraph();
+            Months.fillMonthGraph();
         }
     }
 }

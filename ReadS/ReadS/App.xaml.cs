@@ -16,7 +16,7 @@ namespace ReadS
            
             
             InitializeComponent();
-
+            
             DependencyService.Register<MockDataStore>();
             MainPage = new NavigationPage(new TabbedPage1());
         }

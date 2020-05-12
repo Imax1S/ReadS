@@ -3,10 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using VersFx.Formats.Text.Epub;
+using Xamarin.Essentials;
 using Xamarin.Forms;
+using Xamarin.Forms.StyleSheets;
 using Xamarin.Forms.Xaml;
 
 namespace ReadS
@@ -15,30 +18,153 @@ namespace ReadS
     //Book View witch uses carusel view
     public partial class Book2 : CarouselPage
     {
-        //creating string for text and int for counting pages
+        //Переменные для получения html и подчета страниц
         string htmlCon = "";
         public static int positionOfBook = 0;
+
+        //Страницы
         List<ContentPage> pages = new List<ContentPage>();
-        //CarouselView carouselView = new CarouselView();
-        List<StackLayout> stacks = new List<StackLayout>();
+
+        //Страницы с webViews
         List<WebView> webViews = new List<WebView>();
+
+        double width = Application.Current.MainPage.Width;
+        double height = Application.Current.MainPage.Height;
+
         int index = 1;
 
         //Toolbar for resize text, search pages and style
-        ToolbarItem item = new ToolbarItem
-        {
-            Text = "Шрифт",
-            // IconImageSource = ImageSource.FromFile("baseline_more_vert_black_48dp.png"),
-            Order = ToolbarItemOrder.Secondary,
-            Priority = 0
-        };
+
 
         public Book2(EpubBook book)
         {
             InitializeComponent();
-            this.ToolbarItems.Add(item);
 
             htmlCon = readBook(book);
+            htmlCon = htmlCon.Replace("<title/>", "");
+            string css = GetHtmlSourceWithCustomCss(book);
+            Dictionary<string, string> transliter = new Dictionary<string, string>();
+            #region Алфавит
+            transliter.Add("а", "a");
+            transliter.Add("б", "b");
+            transliter.Add("в", "v");
+            transliter.Add("г", "g");
+            transliter.Add("д", "d");
+            transliter.Add("е", "e");
+            transliter.Add("ё", "yo");
+            transliter.Add("ж", "zh");
+            transliter.Add("з", "z");
+            transliter.Add("и", "i");
+            transliter.Add("й", "j");
+            transliter.Add("к", "k");
+            transliter.Add("л", "l");
+            transliter.Add("м", "m");
+            transliter.Add("н", "n");
+            transliter.Add("о", "o");
+            transliter.Add("п", "p");
+            transliter.Add("р", "r");
+            transliter.Add("с", "s");
+            transliter.Add("т", "t");
+            transliter.Add("у", "u");
+            transliter.Add("ф", "f");
+            transliter.Add("х", "h");
+            transliter.Add("ц", "c");
+            transliter.Add("ч", "ch");
+            transliter.Add("ш", "sh");
+            transliter.Add("щ", "sch");
+            transliter.Add("ъ", "j");
+            transliter.Add("ы", "i");
+            transliter.Add("ь", "j");
+            transliter.Add("э", "e");
+            transliter.Add("ю", "yu");
+            transliter.Add("я", "ya");
+            transliter.Add("А", "A");
+            transliter.Add("Б", "B");
+            transliter.Add("В", "V");
+            transliter.Add("Г", "G");
+            transliter.Add("Д", "D");
+            transliter.Add("Е", "E");
+            transliter.Add("Ё", "Yo");
+            transliter.Add("Ж", "Zh");
+            transliter.Add("З", "Z");
+            transliter.Add("И", "I");
+            transliter.Add("Й", "J");
+            transliter.Add("К", "K");
+            transliter.Add("Л", "L");
+            transliter.Add("М", "M");
+            transliter.Add("Н", "N");
+            transliter.Add("О", "O");
+            transliter.Add("П", "P");
+            transliter.Add("Р", "R");
+            transliter.Add("С", "S");
+            transliter.Add("Т", "T");
+            transliter.Add("У", "U");
+            transliter.Add("Ф", "F");
+            transliter.Add("Х", "H");
+            transliter.Add("Ц", "C");
+            transliter.Add("Ч", "Ch");
+            transliter.Add("Ш", "Sh");
+            transliter.Add("Щ", "Sch");
+            transliter.Add("Ъ", "J");
+            transliter.Add("Ы", "I");
+            transliter.Add("Ь", "J");
+            transliter.Add("Э", "E");
+            transliter.Add("Ю", "Yu");
+            transliter.Add("Я", "Ya");
+            #endregion
+
+            string newFolder = String.Join("", book.Title.Split());
+            foreach (KeyValuePair<string, string> pair in transliter)
+            {
+                newFolder = newFolder.Replace(pair.Key, pair.Value);
+            }
+            //string fileDirectory = Path.Combine(FileSystem.CacheDirectory, newFolder);
+            string fileDirectory = FileSystem.CacheDirectory;
+
+            //using (StreamWriter writer = new StreamWriter(Path.Combine(fileDirectory, "style.css")))
+            //{
+            //    writer.Write(css);
+            //}
+            Dictionary<string, EpubContentFile> allFiles = book.Content.AllFiles;
+
+            string[] files = Directory.GetFiles(FileSystem.CacheDirectory);
+            //foreach (string filePath in files)
+            //    File.Delete(filePath);
+            //string[] filesNew = Directory.GetFiles(FileSystem.CacheDirectory);
+            //foreach (EpubContentFile item in allFiles.Values)
+            //{
+            //    try
+            //    {
+            //        string path = Path.Combine(fileDirectory, item.FileName);
+            //        if (!Directory.Exists(Path.GetDirectoryName(path)))
+            //        {
+            //            Directory.CreateDirectory(path);
+            //        }
+
+                    
+            //        string[] directories = Directory.GetDirectories(FileSystem.CacheDirectory);
+
+            //        using (StreamWriter writer = new StreamWriter(path))
+            //        {
+
+            //            if (File.Exists(path))
+            //            {
+            //                continue;
+            //            }
+            //            writer.Write(item.ContentMimeType);
+            //        }
+            //    }
+            //    catch (UnauthorizedAccessException ex)
+            //    {
+            //        continue;
+            //    }
+            //}
+            //filesNew = Directory.GetFiles(FileSystem.CacheDirectory);
+            using (StreamWriter writer = new StreamWriter(Path.Combine(FileSystem.CacheDirectory, "style.css"), true, Encoding.Default))
+            {
+                writer.Write(GetHtmlSourceWithCustomCss(book));
+            }
+
             string temp = "";
             Label label = new Label()
             {
@@ -64,7 +190,7 @@ namespace ReadS
             for (int i = 0; i < words.Count; i++)
             {
                 temp += words[i] + " ";
-                if (counterLetters == 125)
+                if (counterLetters == 150)
                 {
                     pages.Add(new ContentPage()
                     {
@@ -79,7 +205,7 @@ namespace ReadS
                                 Padding = 15,
                                 TextColor = Color.Black,
                                 FontFamily = "Kurale"},
-                                
+
                                 new Label()
                                 {
                                     FontSize = 10,
@@ -115,15 +241,18 @@ namespace ReadS
                     //            }
                     //        }
                     //});
+
                     var htmlSource = new HtmlWebViewSource();
+                    htmlSource.BaseUrl = DependencyService.Get<IBaseUrl>().Get();
+                    temp = temp.Replace("<title/>", "");
                     htmlSource.Html = temp;
 
 
                     webViews.Add(new WebView()
                     {
                         Source = htmlSource,
-                        
                     });
+
                     counterLetters = 0;
                     temp = "";
                 }
@@ -131,22 +260,11 @@ namespace ReadS
             }
 
 
-            //CarouselView carousel = new CarouselView()
-            //{
-            //    ItemsLayout = new LinearItemsLayout(ItemsLayoutOrientation.Vertical)
-            //    {
-            //        ItemSpacing = 20
-            //    }
-            //};
-            //carousel.ItemsSource = layout;
-            //ContentPage contentPage = new ContentPage() { Content = carousel };
-            //this.Children.Add(contentPage);
-
-
             //foreach (ContentPage item in pages)
             //{
             //    this.Children.Add(item);
             //}
+
             this.Children.Add(new ContentPage()
             {
                 Content = new ImageButton()
@@ -155,10 +273,20 @@ namespace ReadS
                 }
             });
 
+
             foreach (WebView item in webViews)
             {
-                this.Children.Add(new ContentPage() { Content = item});
+                this.Children.Add(new ContentPage() { Content = item });
             }
+
+
+            //WebView all = new WebView();
+            //UrlWebViewSource urlSource = new UrlWebViewSource();
+            //urlSource.Url = "niggers.html";
+
+            //all.Source = urlSource;
+            //this.Children.Add(new ContentPage() { Content = all });
+
             //ContentPage page = new ContentPage();
             //StackLayout stackLayout = new StackLayout();
             //stackLayout.Children.Add(carouselView);
@@ -168,8 +296,9 @@ namespace ReadS
 
         public string readBook(EpubBook book)
         {
-            
             string chapterHtmlContent = "";
+
+            //Читаем по главам
             foreach (EpubChapter chapter in book.Chapters)
             {
                 // Title of chapter
@@ -187,16 +316,41 @@ namespace ReadS
                 }
             }
 
-            
+            //Читаем весь html
+            string htmlContent = "";
+            Dictionary<string, EpubTextContentFile> htmlFiles = book.Content.Html;
+            foreach (EpubTextContentFile htmlFile in htmlFiles.Values)
+            {
+                htmlContent += htmlFile.Content;
+            }
 
 
             //label = new Label();
             //label.Text = chapterHtmlContent;
             //label.FontSize = 15;
             //label.TextType = TextType.Html;
+
+            //return htmlContent;
             return chapterHtmlContent;
         }
 
+        public string GetHtmlSourceWithCustomCss(EpubBook book)
+        {
+
+
+            string cssContent = "";
+            foreach (EpubTextContentFile cssFile in book.Content.Css.Values)
+            {
+                cssContent += cssFile.Content;
+            }
+
+            // Replace css
+            //var customCss = book.Content.Css;
+            //htmlCode = htmlCode.Replace("<head>", cssContent);
+
+            //htmlSource.Html = htmlCode;
+            return cssContent;
+        }
 
         protected override void OnCurrentPageChanged()
         {
@@ -206,7 +360,7 @@ namespace ReadS
                 Goal.SaveGoal();
                 Goal.RefreshGoalGraph();
                 index = Children.IndexOf(CurrentPage);
-                
+
             }
         }
     }
