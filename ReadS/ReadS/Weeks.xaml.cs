@@ -21,8 +21,7 @@ namespace ReadS
     {
         static List<DayStat> dayStats = new List<DayStat>();
         static Microcharts.Forms.ChartView StatsOfReadingByDates = new Microcharts.Forms.ChartView();
-        static string filename = Path.Combine(FileSystem.AppDataDirectory, "stats.txt");
-        Random random = new Random();
+        static string filename = Path.Combine(FileSystem.AppDataDirectory, "stats.json");
         ScrollView scroll = new ScrollView()
         {
             Orientation = ScrollOrientation.Horizontal
@@ -44,36 +43,65 @@ namespace ReadS
         public Weeks()
         {
             InitializeComponent();
-            //for (int i = 0; i < 3; i++)
-            //{
-            //    entries.Add(new Entry(random.Next(200, 700))
-            //    {
-            //        Color = SKColor.Parse("#4285F4"),
-            //    });
-            //}
 
-            fillWeekGraph();
-            scroll.Content = StatsOfReadingByDates;
+            //Если есть информация о статистике, то отрисовывает график 
+            if (FillWeekGraph())
+            {
+                scroll.Content = StatsOfReadingByDates;
 
-            Label header = new Label
+                Label header = new Label
+                {
+                    Text = namesOfMonths[dayStats[0].Date.Month],
+                    FontSize = 40,
+                    HorizontalOptions = LayoutOptions.Center,
+                    Padding = 20,
+                };
+                this.Padding = new Thickness(10, Device.OnPlatform(20, 20, 0), 10, 5);
+                Content = new StackLayout()
+                {
+                    Children = { header, scroll }
+                };
+            }
+            else
             {
-                Text = namesOfMonths[dayStats[0].Date.Month],
-                FontSize = 40,
-                HorizontalOptions = LayoutOptions.Center,
-                Padding = 20,
-            };
-            this.Padding = new Thickness(10, Device.OnPlatform(20, 20, 0), 10, 5);
-            Content = new StackLayout()
-            {
-                Children = { header, scroll }
-            };
+                //Если нет, то сообщает об этом
+                Label noStat = new Label()
+                {
+                    Text = "Пока что ещё нет статистики. Начните читать и она будет здесь)",
+                    VerticalOptions = LayoutOptions.CenterAndExpand,
+                    HorizontalOptions = LayoutOptions.CenterAndExpand,
+                    FontSize = 16,
+                    Padding = 10
+                };
+            }
+
         }
 
-        static public void fillWeekGraph()
+        /// <summary>
+        /// Орисовывает график для недель
+        /// </summary>
+        /// <returns></returns>
+        static public bool FillWeekGraph()
         {
             List<Entry> entries = new List<Entry>();
             try
             {
+
+                entries.Add(new Entry(300)
+                {
+                    Color = SKColor.Parse("#4285F4"),
+                    Label = "26 - 2",
+                    ValueLabel = (300).ToString(),
+                });
+
+                entries.Add(new Entry(290)
+                {
+                    Color = SKColor.Parse("#4285F4"),
+                    Label = "3 - 9",
+                    ValueLabel = (290).ToString(),
+                });
+
+                //Чтения файла
                 using (StreamReader reader = new StreamReader(filename))
                 {
                     string json = reader.ReadToEnd();
@@ -84,6 +112,8 @@ namespace ReadS
 
                 List<DayStat> days = new List<DayStat>();
                 string period;
+
+                //Создание объектов WeekStat
                 for (int i = 0; i < dayStats.Count; i++)
                 {
                     days.Add(dayStats[i]);
@@ -111,23 +141,16 @@ namespace ReadS
                     });
                 }
 
-                StatsOfReadingByDates.HeightRequest = 300;
+                StatsOfReadingByDates.HeightRequest = 500;
                 StatsOfReadingByDates.WidthRequest = 100 * entries.Count;
                 StatsOfReadingByDates.HorizontalOptions = LayoutOptions.End;
                 StatsOfReadingByDates.VerticalOptions = LayoutOptions.End;
-                StatsOfReadingByDates.Chart = new Microcharts.LineChart { Entries = entries, LabelTextSize = 40, BackgroundColor = SKColor.Parse("#FFFFFF") };
+                StatsOfReadingByDates.Chart = new Microcharts.LineChart { Entries = entries, LabelTextSize = 40, BackgroundColor = SKColor.Parse("#FAFAFA") };
+                return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
-                Label noStat = new Label()
-                {
-                    Text = "Пока что ещё нет статистики. Начните читать и она будет здесь)",
-                    VerticalOptions = LayoutOptions.CenterAndExpand,
-                    HorizontalOptions = LayoutOptions.CenterAndExpand,
-                    FontSize = 16,
-                    Padding = 10
-                };
+                return false;
             }
         }
     }

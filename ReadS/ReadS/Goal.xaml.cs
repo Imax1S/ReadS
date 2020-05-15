@@ -17,50 +17,59 @@ namespace ReadS
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class Goal : ContentPage
     {
+        //Создание переменных
         Label pages = new Label();
         public static int goalPages = 0;
         public static int pagesRead = 0;
         static Microcharts.Forms.ChartView StatsOfReading = new Microcharts.Forms.ChartView();
-        //static string path = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
-        static string filenameGoal = Path.Combine(FileSystem.AppDataDirectory, "goals.txt");
-        static string filename = Path.Combine(FileSystem.AppDataDirectory, "stats.txt");
+        static string filename = Path.Combine(FileSystem.AppDataDirectory, "stats.json");
         List<DayStat> dayStats = new List<DayStat>();
         DateTime choosenDayForGoal;
-        bool MobilePages = true;
+        static public bool MobilePages = true;
 
         //Слайдер для цели
         Slider slider = new Slider
         {
             Minimum = 0,
-            Maximum = 100,
+            Maximum = 500,
         };
 
+        //Кнопка для переключения подсчета страниц
         ToolbarItem bookOrMobilePages = new ToolbarItem()
         {
             Text = "Подсчет в мобильных страницах",
-            // IconImageSource = ImageSource.FromFile("baseline_more_vert_black_48dp.png"),
             Order = ToolbarItemOrder.Secondary,
             Priority = 0,
         };
 
-        Picker bookPicker = new Picker
+        //Выбор книги
+        public static Picker bookPicker = new Picker
         {
             Title = "Выберите книгу",
             VerticalOptions = LayoutOptions.CenterAndExpand
         };
+
         public Goal()
         {
             InitializeComponent();
+
+            //Добавление функций к кнопкам
             bookOrMobilePages.Clicked += ChangeCounterOfPage;
             this.ToolbarItems.Add(bookOrMobilePages);
+
             try
             {
+                //Чтение файла с статистикой
                 using (StreamReader reader = new StreamReader(filename))
                 {
                     string json = reader.ReadToEnd();
+
+                    //Если json не пустой
                     if (json != "")
                     {
                         dayStats = JsonConvert.DeserializeObject<List<DayStat>>(json);
+
+                        //Если последний день из файла соответсвует сегодняшнему дню, то просто берутся значения goalPages и pagesRead 
                         if (DateTime.Today == dayStats[dayStats.Count - 1].Date)
                         {
                             goalPages = dayStats[dayStats.Count - 1].Goal;
@@ -68,20 +77,22 @@ namespace ReadS
                         }
                         else
                         {
+                            //Если же не соответсвует, то читается последняя информация о goalPages, а для pagesRead ставится 0
                             goalPages = dayStats[dayStats.Count - 1].Goal;
                             pagesRead = 0;
+
+                            //Для каждого дня между последним записанным и сегодняшнем ставится pagesRead 0
+                            int leftDays = (int)(DateTime.Today - dayStats[dayStats.Count - 1].Date).TotalDays;
+                            for (int i = leftDays; i > 0; i--)
+                            {
+                                dayStats.Add(new DayStat(0, DateTime.Today.AddDays(-i), goalPages));
+                            }
                         }
                     }
                     else
                     {
                         goalPages = 0;
                         pagesRead = 0;
-                    }
-
-                    int leftDays = (int)(DateTime.Today - dayStats[dayStats.Count - 1].Date).TotalDays;
-                    for (int i = leftDays; i > 0; i--)
-                    {
-                        dayStats.Add(new DayStat(0, DateTime.Today.AddDays(-i), goalPages));
                     }
 
                 }
@@ -91,14 +102,15 @@ namespace ReadS
                 Console.WriteLine("Something went wrong");
             }
 
+            //Настройка слайдера
             slider.Value = goalPages;
             slider.VerticalOptions = LayoutOptions.FillAndExpand;
             slider.VerticalOptions = LayoutOptions.CenterAndExpand;
-            //slider.Scale = 5;
             slider.ThumbColor = Color.Gray;
             slider.MinimumTrackColor = Color.CadetBlue;
             slider.Margin = 20;
 
+            //Создание сетки
             Grid grid = new Grid
             {
                 VerticalOptions = LayoutOptions.FillAndExpand,
@@ -123,7 +135,7 @@ namespace ReadS
             {
                 Value = slider.Value,
                 Minimum = 0,
-                Maximum = 100,
+                Maximum = 500,
                 Increment = 1,
                 HorizontalOptions = LayoutOptions.Center,
                 VerticalOptions = LayoutOptions.CenterAndExpand,
@@ -131,16 +143,19 @@ namespace ReadS
             stepper.ValueChanged += OnStepperValueChanged;
             this.Padding = new Thickness(10, Device.OnPlatform(20, 0, 0), 10, 5);
 
-
+            //Настройка label с информацией о цели
             pages.VerticalOptions = LayoutOptions.CenterAndExpand;
             pages.HorizontalOptions = LayoutOptions.CenterAndExpand;
             pages.FontSize = 20;
+
+            //Если цель равна 0
             if (goalPages == 0)
             {
                 pages.Text = "Передвиньте ползунок, чтобы поставить цель или выберите книгу и дату, чтобы рассчитать цель";
             }
             else
             {
+                //Если не равна, то проверяет достигнута цель или нет
                 StatsOfReading.Opacity = 100;
                 slider.AnchorX = goalPages;
                 if (goalPages <= pagesRead)
@@ -158,6 +173,7 @@ namespace ReadS
             //Если значения слайдера изменилось
             slider.ValueChanged += (sender, args) =>
             {
+                //Проверяем цель
                 if ((int)slider.Value == 0)
                 {
                     pages.Text = "Передвиньте ползунок, чтобы поставить цель";
@@ -183,6 +199,7 @@ namespace ReadS
                 stepper.Value = (int)args.NewValue;
             };
 
+            //Создаем поле для выбора даты
             DatePicker datePicker = new DatePicker
             {
                 Format = "D",
@@ -192,11 +209,13 @@ namespace ReadS
             };
             datePicker.DateSelected += datePicker_DateSelected;
 
+            //Добавляем в контейнер все загруженные книги
             foreach (string book in Books.books.Keys)
             {
                 bookPicker.Items.Add(book);
             }
 
+            //Вызывается когда bookPicker меняется
             bookPicker.SelectedIndexChanged += (sender, args) =>
             {
                 if (datePicker.Date != DateTime.Today)
@@ -204,6 +223,7 @@ namespace ReadS
                     CountGoal(datePicker.Date, Books.books[bookPicker.Items[bookPicker.SelectedIndex]]);
                 }
             };
+
             //Добавляем элементы
             grid.Children.Add(StatsOfReading, 0, 0);
             Grid.SetColumnSpan(StatsOfReading, 3);
@@ -221,6 +241,8 @@ namespace ReadS
             Grid.SetColumnSpan(bookPicker, 2);
 
             grid.Children.Add(datePicker, 2, 4);
+
+            //Добавляем сетку на страницу
             Content = new StackLayout
             {
                 Children =
@@ -255,21 +277,36 @@ namespace ReadS
             }
         }
 
-
+        /// <summary>
+        /// Считает цель
+        /// </summary>
+        /// <param name="deadline"></param>
+        /// <param name="book"></param>
         private void CountGoal(DateTime deadline, EpubBook book)
         {
-            int amountOfPages = new Book(book).numberOfPages.Count;
+            int amountOfPages = new Book(book).amountOfPages;
             int daysLeft = (deadline - DateTime.Today).Days;
-            if (MobilePages)
+            if (daysLeft > 0)
             {
-                slider.Value = amountOfPages / daysLeft;
+                if (MobilePages)
+                {
+                    slider.Value = amountOfPages / daysLeft;
+                }
+                else
+                {
+                    amountOfPages /= 4;
+                    slider.Value = amountOfPages / daysLeft;
+                }
             }
             else
             {
-                amountOfPages /= 4;
-                slider.Value = amountOfPages / daysLeft;
+                pages.Text = "Чтобы выполнить цель необходима машина времени";
+                return;
             }
+
+            pages.Text = "Чтобы выполнить цель необходимо читать по " + goalPages + " страниц";
         }
+
         /// <summary>
         /// Меняет значение цели через степпер
         /// </summary>
@@ -350,7 +387,8 @@ namespace ReadS
                 writer.Write(json);
             }
 
-            Statics2.fillGraph();
+            //Обновлят все графики
+            Statics.FillGraph();
         }
     }
 }

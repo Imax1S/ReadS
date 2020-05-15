@@ -33,12 +33,40 @@ namespace ReadS
 
         int index = 1;
 
-        //Toolbar for resize text, search pages and style
-
+        List<Label> labelsPage = new List<Label>();
 
         public Book2(EpubBook book)
         {
             InitializeComponent();
+            ToolbarItem search = new ToolbarItem
+            {
+
+                IconImageSource = ImageSource.FromFile("outline_search_white_48dp.png"),
+                Order = ToolbarItemOrder.Default,
+                Priority = 0,
+
+            };
+            ToolbarItem textUp = new ToolbarItem
+            {
+
+                IconImageSource = ImageSource.FromFile("round_text_format_black_48dp.png"),
+                Order = ToolbarItemOrder.Default,
+                Priority = 0,
+
+            };
+            ToolbarItem textDown = new ToolbarItem
+            {
+
+                IconImageSource = ImageSource.FromFile("round_text_format_white_48dp.png"),
+                Order = ToolbarItemOrder.Default,
+                Priority = 0,
+            };
+            textDown.Clicked += DecreaseTextSize;
+            textUp.Clicked += IncreaseTextSize;
+
+            this.ToolbarItems.Add(textUp);
+            this.ToolbarItems.Add(textDown);
+            this.ToolbarItems.Add(search);
 
             htmlCon = readBook(book);
             htmlCon = htmlCon.Replace("<title/>", "");
@@ -141,7 +169,7 @@ namespace ReadS
             //            Directory.CreateDirectory(path);
             //        }
 
-                    
+
             //        string[] directories = Directory.GetDirectories(FileSystem.CacheDirectory);
 
             //        using (StreamWriter writer = new StreamWriter(path))
@@ -192,29 +220,39 @@ namespace ReadS
                 temp += words[i] + " ";
                 if (counterLetters == 150)
                 {
+
+                    var htmlSource = new HtmlWebViewSource();
+                    htmlSource.BaseUrl = DependencyService.Get<IBaseUrl>().Get();
+                    temp = temp.Replace("<title/>", "");
+                    htmlSource.Html = temp;
+                    Label text = new Label()
+                    {
+                        FontSize = 18,
+                        Text = htmlSource.Html,
+                        TextType = TextType.Html,
+                        VerticalOptions = LayoutOptions.CenterAndExpand,
+                        HorizontalOptions = LayoutOptions.CenterAndExpand,
+                        Padding = 15,
+                        TextColor = Color.Black,
+                        FontFamily = "Georgia",
+                    };
+                    labelsPage.Add(text);
                     pages.Add(new ContentPage()
                     {
                         Content = new StackLayout()
                         {
-                            Children = {new Label(){
-                                FontSize = 18,
-                                TextType = TextType.Html,
-                                Text = temp,
-                                VerticalOptions = LayoutOptions.CenterAndExpand,
-                                HorizontalOptions = LayoutOptions.CenterAndExpand,
-                                Padding = 15,
-                                TextColor = Color.Black,
-                                FontFamily = "Kurale"},
 
-                                new Label()
-                                {
-                                    FontSize = 10,
-                                    Text = (counterPage++).ToString(),
-                                    VerticalOptions = LayoutOptions.Center,
-                                    HorizontalOptions = LayoutOptions.Center,
-                                    Padding = 10,
-                                    FontFamily = "Kurale"
-                                }
+                            Children = {text,
+
+                        new Label()
+                        {
+                            FontSize = 10,
+                            Text = (counterPage++).ToString(),
+                            VerticalOptions = LayoutOptions.Center,
+                            HorizontalOptions = LayoutOptions.Center,
+                            Padding = 10,
+                            FontFamily = "Kurale"
+                        }
                             }
                         }
                     });
@@ -242,11 +280,6 @@ namespace ReadS
                     //        }
                     //});
 
-                    var htmlSource = new HtmlWebViewSource();
-                    htmlSource.BaseUrl = DependencyService.Get<IBaseUrl>().Get();
-                    temp = temp.Replace("<title/>", "");
-                    htmlSource.Html = temp;
-
 
                     webViews.Add(new WebView()
                     {
@@ -260,24 +293,24 @@ namespace ReadS
             }
 
 
-            //foreach (ContentPage item in pages)
-            //{
-            //    this.Children.Add(item);
-            //}
-
-            this.Children.Add(new ContentPage()
+            foreach (ContentPage item in pages)
             {
-                Content = new ImageButton()
-                {
-                    Source = image.Source
-                }
-            });
-
-
-            foreach (WebView item in webViews)
-            {
-                this.Children.Add(new ContentPage() { Content = item });
+                this.Children.Add(item);
             }
+
+            //this.Children.Add(new ContentPage()
+            //{
+            //    Content = new ImageButton()
+            //    {
+            //        Source = image.Source
+            //    }
+            //});
+
+
+            //foreach (WebView item in webViews)
+            //{
+            //    this.Children.Add(new ContentPage() { Content = item });
+            //}
 
 
             //WebView all = new WebView();
@@ -324,13 +357,6 @@ namespace ReadS
                 htmlContent += htmlFile.Content;
             }
 
-
-            //label = new Label();
-            //label.Text = chapterHtmlContent;
-            //label.FontSize = 15;
-            //label.TextType = TextType.Html;
-
-            //return htmlContent;
             return chapterHtmlContent;
         }
 
@@ -361,6 +387,22 @@ namespace ReadS
                 Goal.RefreshGoalGraph();
                 index = Children.IndexOf(CurrentPage);
 
+            }
+        }
+
+        public void DecreaseTextSize(object sender, EventArgs e)
+        {
+      
+                //this.Children.Add(pages[i]);
+            
+        }
+
+        public void IncreaseTextSize(object sender, EventArgs e)
+        {
+            this.Children.Clear();
+            foreach (Label item in labelsPage)
+            {
+                item.FontSize -= 2;
             }
         }
     }

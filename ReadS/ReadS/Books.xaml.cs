@@ -159,40 +159,52 @@ namespace ReadS
                 await Navigation.PushAsync(loadedBooks[loadedBooks.Count - 1]);
             }
         }
+        /// <summary>
+        /// Чтение книги с устройства
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         async void LoadButtonClicked(object sender, EventArgs e)
         {
-            ProgressBar progressBar = new ProgressBar() { Progress = .2 };
             try
             {
+                //Допустимые форматы
                 string[] types = new string[] { ".epub" };
-                FileData fileData = await CrossFilePicker.Current.PickFile(allowedTypes: types);
-                if (fileData == null)
-                    return; // user canceled file picking
-                //await progressBar.ProgressTo(.8, 250, Easing.Linear);
-                string fileName = fileData.FileName;
-                string contents = System.Text.Encoding.UTF8.GetString(fileData.DataArray);
-                //var pathFile = Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDownloads);
 
-                Console.WriteLine("File name chosen: " + fileName);
-                Debug.WriteLine("File data: " + contents);
-                Console.WriteLine("File data: " + contents);
+                //Открываем проводник
+                FileData fileData = await CrossFilePicker.Current.PickFile(allowedTypes: types);
+
+                //Если ничего не выбрано, то просто возвращаем  null
+                if (fileData == null)
+                    return; 
+                
+                //Создаем объект EpubBook
                 EpubBook newBook = EpubReader.ReadBook(new MemoryStream(fileData.DataArray));
+
+                //Добавляем в словарь
                 books.Add(newBook.Title + Environment.NewLine + newBook.Author, newBook);
 
+                //Берем путь и сохраняем его для того, чтобы после закрытия программы все книги отобразились вновь
                 string path = fileData.FilePath;
                 using (StreamWriter sw = new StreamWriter(filenameForBooks, true, System.Text.Encoding.Default))
                 {
                     sw.WriteLine(path);
                 }
+
+                foreach (string book in Books.books.Keys)
+                {
+                    Goal.bookPicker.Items.Add(book);
+                }
+                //Создаём кнопку с книгой
                 LoadNewBook(newBook);
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Exception choosing file: " + ex.ToString());
+                Console.WriteLine("Ошибка при выборе файла: " + ex.ToString());
             }
         }
 
-        public void LoadNewBook(EpubBook book)
+        private void LoadNewBook(EpubBook book)
         {
 
             Button book_button = new Button()
@@ -200,7 +212,7 @@ namespace ReadS
                 // ContentLayout = new Button.ButtonContentLayout(Button.ButtonContentLayout.ImagePosition.Left , 10),
                 WidthRequest = 100,
                 HeightRequest = 100,
-                BackgroundColor = Color.White,
+                BackgroundColor = Color.WhiteSmoke
             };
             book_button.Text = book.Title + Environment.NewLine + book.Author;
             book_button.Clicked += Book_Clicked;
@@ -209,8 +221,8 @@ namespace ReadS
             buttonsBook.Add(book_button);
             ImageButton image = new ImageButton();
             image.Source = ImageSource.FromStream(() => new MemoryStream(book.CoverImage));
-            image.BackgroundColor = Color.White;
-            image.CornerRadius = 50;
+            image.BackgroundColor = Color.FromHex("#FAFAFA");
+            image.CornerRadius = 90;
 
 
             library.RowDefinitions.Add(new RowDefinition { Height = new GridLength(100, GridUnitType.Absolute) });

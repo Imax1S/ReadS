@@ -7,6 +7,8 @@ namespace ReadS.Classes_For_Stats
     class MonthStat
     {
         List<DayStat> days = new List<DayStat>();
+
+        //Суммарное количество страниц за месяц
         public int PagesTotal
         {
             get
@@ -24,6 +26,7 @@ namespace ReadS.Classes_For_Stats
             }
         }
 
+        //Среднее количество страниц в месяц
         public double Average
         {
             get
@@ -41,6 +44,7 @@ namespace ReadS.Classes_For_Stats
             }
         }
 
+        //Название месяца
         public string Month { get; set; }
 
         public MonthStat(List<DayStat> days, string month)

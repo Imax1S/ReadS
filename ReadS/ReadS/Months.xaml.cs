@@ -16,14 +16,17 @@ namespace ReadS
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class Months : ContentPage
     {
+        //Создание переменных
         static List<DayStat> dayStats = new List<DayStat>();
         static Microcharts.Forms.ChartView StatsOfReadingByDates = new Microcharts.Forms.ChartView();
-        static string filename = Path.Combine(FileSystem.AppDataDirectory, "stats.txt");
-        Random random = new Random();
+        static string filename = Path.Combine(FileSystem.AppDataDirectory, "stats.json");
+
         ScrollView scroll = new ScrollView()
         {
             Orientation = ScrollOrientation.Horizontal
         };
+
+        //Словарь с месяцами
         static Dictionary<int, string> namesOfMonths = new Dictionary<int, string> {
             {1, "Январь" },
             {2, "Февраль" } ,
@@ -43,43 +46,53 @@ namespace ReadS
         public Months()
         {
             InitializeComponent();
-            //for (int i = 0; i < 3; i++)
-            //{
-            //    int ran = random.Next(200, 3000);
-            //    entries.Add(new Entry(ran)
-            //    {
-            //        Color = SKColor.Parse("#4285F4"),
-            //        Label = namesOfMonths[i + 1],
-            //        ValueLabel = ran.ToString(),
-            //    });
-            //}
 
-            fillMonthGraph();
-            //StatsOfReadingByDates.HeightRequest = 300;
-            //StatsOfReadingByDates.WidthRequest = 100 * entries.Count;
-            //StatsOfReadingByDates.HorizontalOptions = LayoutOptions.End;
-            //StatsOfReadingByDates.VerticalOptions = LayoutOptions.End;
-            //StatsOfReadingByDates.Chart = new Microcharts.LineChart { Entries = entries, LabelTextSize = 40, BackgroundColor = SKColor.Parse("#FFFFFF") };
-            Label header = new Label
+            //Если нет данных о статистике, то сообщает об этом 
+            if (!FillMonthGraph())
             {
-                Text = dayStats[0].Date.Year.ToString(),
-                FontSize = 40,
-                HorizontalOptions = LayoutOptions.Center,
-                Padding = 20,
-            };
-            this.Padding = new Thickness(10, Device.OnPlatform(20, 20, 0), 10, 5);
-            scroll.Content = StatsOfReadingByDates;
-            Content = new StackLayout()
+                Label noStat = new Label()
+                {
+                    Text = "Пока что ещё нет статистики. Начните читать и она будет здесь)",
+                    VerticalOptions = LayoutOptions.CenterAndExpand,
+                    HorizontalOptions = LayoutOptions.CenterAndExpand,
+                    FontSize = 16,
+                    Padding = 10
+                };
+                Content = new StackLayout()
+                {
+                    Children = {noStat }
+                };
+            }
+            else
             {
-                Children = {header, scroll }
-            };
+                //Если нет, то отрисовывает
+                Label header = new Label
+                {
+                    Text = dayStats[0].Date.Year.ToString(),
+                    FontSize = 40,
+                    HorizontalOptions = LayoutOptions.Center,
+                    Padding = 20,
+                };
+                this.Padding = new Thickness(10, Device.OnPlatform(20, 20, 0), 10, 5);
+                scroll.Content = StatsOfReadingByDates;
+                Content = new StackLayout()
+                {
+                    Children = { header, scroll }
+                };
+            }
         }
 
-        static public void fillMonthGraph()
+        /// <summary>
+        /// Отрисовывает график по месяцам
+        /// </summary>
+        /// <returns></returns>
+        static public bool FillMonthGraph()
         {
+            //Лист с точками на графике
             List<Entry> entries = new List<Entry>();
             try
             {
+                //Чтение файла
                 using (StreamReader reader = new StreamReader(filename))
                 {
                     string json = reader.ReadToEnd();
@@ -90,9 +103,13 @@ namespace ReadS
 
                 List<DayStat> days = new List<DayStat>();
                 int tempMonth = dayStats[0].Date.Month;
+
+                //По дням создаются объекты MonthStat
                 for (int i = 0; i < dayStats.Count - 1; i++)
                 {
                     days.Add(dayStats[i]);
+
+                    //Если день уже принадлежит другому месяцу, то создает новый MonthStat объект
                     if (dayStats[i + 1].Date.Month != tempMonth)
                     {
                         monthStats.Add(new Classes_For_Stats.MonthStat(days, namesOfMonths[dayStats[i].Date.Month]));
@@ -105,6 +122,7 @@ namespace ReadS
                     monthStats.Add(new Classes_For_Stats.MonthStat(days, namesOfMonths[days[0].Date.Month]));
                 }
 
+                //Создание точек
                 foreach (Classes_For_Stats.MonthStat week in monthStats)
                 {
                     entries.Add(new Entry(week.PagesTotal)
@@ -115,23 +133,19 @@ namespace ReadS
                     });
                 }
 
-                StatsOfReadingByDates.HeightRequest = 300;
+                //Настройка графика
+                StatsOfReadingByDates.HeightRequest = 500;
                 StatsOfReadingByDates.WidthRequest = 100 * entries.Count;
                 StatsOfReadingByDates.HorizontalOptions = LayoutOptions.End;
                 StatsOfReadingByDates.VerticalOptions = LayoutOptions.End;
-                StatsOfReadingByDates.Chart = new Microcharts.LineChart { Entries = entries, LabelTextSize = 40, BackgroundColor = SKColor.Parse("#FFFFFF") };
+                StatsOfReadingByDates.Chart = new Microcharts.LineChart { Entries = entries, LabelTextSize = 40, BackgroundColor = SKColor.Parse("#FAFAFA") };
+                //После успешного чтения возращает true
+                return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
-                Label noStat = new Label()
-                {
-                    Text = "Пока что ещё нет статистики. Начните читать и она будет здесь)",
-                    VerticalOptions = LayoutOptions.CenterAndExpand,
-                    HorizontalOptions = LayoutOptions.CenterAndExpand,
-                    FontSize = 16,
-                    Padding = 10
-                };
+                //Если ловится исключение, то возвращает false
+                return false;
             }
         }
     }

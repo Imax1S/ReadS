@@ -9,8 +9,7 @@
              xmlns:local="clr-namespace:ReadS"
              android:TabbedPage.ToolbarPlacement="Bottom"
              android:TabbedPage.BarBackgroundColor="White">
-    <!--Pages can be added as references or inline-->
-    <local:Statics2 IconImageSource="round_assessment_black_48dp.png" HeightRequest="10" WidthRequest="10"></local:Statics2>
+    <local:Statics IconImageSource="round_assessment_black_48dp.png" HeightRequest="10" WidthRequest="10"></local:Statics>
     <local:Books IconImageSource="round_book_black_48dp.png"></local:Books>
     <local:Goal IconImageSource="round_assignment_turned_in_black_48dp.png"></local:Goal>
 </TabbedPage>   

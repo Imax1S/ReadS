@@ -8,6 +8,7 @@ namespace ReadS.Classes_For_Stats
     {
         List<DayStat> dayStats = new List<DayStat>();
 
+        //Суммарное количество страниц за неделю
         public int PagesTotal
         {
             get
@@ -25,8 +26,11 @@ namespace ReadS.Classes_For_Stats
 
             }
         }
+
+        //Представление недели
         public string Period { get; set; }
 
+        //Среднее количество страниц за неделю
         public double Average
         {
             get

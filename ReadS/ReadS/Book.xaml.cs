@@ -17,21 +17,49 @@ namespace ReadS
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class Book : ContentPage
     {
-        //ScrollView scroll;
-        //Label label;
         string htmlCon = "";
+        double startSizeText = 1.0;
         public static int positionOfBook = 0;
+        int loadedContent = 10000;
+        int counterPage = 1;
+        string fullHtml = "";
+        Grid grid;
+        Button left;
+        Button right;
+        HtmlWebViewSource urlSource = new HtmlWebViewSource();
+        Label numberOfPage;
+        double width = Application.Current.MainPage.Width;
+        double height = Application.Current.MainPage.Height;
+        Entry searchEntry = new Entry();
 
-        //Страницы с webViews
-        List<WebView> webViews = new List<WebView>();
-
+        string html;
         public List<int> numberOfPages = new List<int>();
         ScrollView scroll = new ScrollView();
+        WebViewer webViewer;
+        public int amountOfPages;
+
         public Book(EpubBook book)
         {
+
             InitializeComponent();
+
             this.Title = book.Title;
 
+
+            //Чтение книги
+            htmlCon = ReadBook(book);
+            int counterLetters = 0;
+            List<string> words = htmlCon.Split().ToList();
+            for (int i = 0; i < words.Count; i++)
+            {
+
+                if (counterLetters == 80)
+                {
+                    amountOfPages++;
+                    counterLetters = 0;
+                }
+                counterLetters++;
+            }
             ToolbarItem search = new ToolbarItem
             {
 
@@ -63,12 +91,14 @@ namespace ReadS
                 Maximum = 100,
                 Increment = 1,
             };
-
-            this.ToolbarItems.Add(textUp);
+            textDown.Clicked += DecreaseTextSize;
+            textUp.Clicked += IncreaseTextSize;
+            search.Clicked += SearchPage;
             this.ToolbarItems.Add(textDown);
+            this.ToolbarItems.Add(textUp);
             this.ToolbarItems.Add(search);
 
-            Grid grid = new Grid
+            grid = new Grid
             {
                 VerticalOptions = LayoutOptions.FillAndExpand,
                 RowDefinitions =
@@ -76,7 +106,7 @@ namespace ReadS
                     new RowDefinition { Height = GridLength.Auto },
                     new RowDefinition { Height = GridLength.Auto },
                     new RowDefinition { Height = new GridLength(1, GridUnitType.Star) },
-                    new RowDefinition { Height = new GridLength(50, GridUnitType.Absolute) }
+                    new RowDefinition { Height = new GridLength(40, GridUnitType.Absolute) }
                 },
                 ColumnDefinitions =
                 {
@@ -85,198 +115,75 @@ namespace ReadS
                     new ColumnDefinition { Width = new GridLength(100, GridUnitType.Absolute) }
                 }
             };
-            #region Some Grid elements
-            //grid.Children.Add(new Label
-            //{
-            //    Text = book.Title,
-            //    FontSize = Device.GetNamedSize(NamedSize.Large, typeof(Label)),
-            //    HorizontalOptions = LayoutOptions.Center
-            //}, 0, 3, 0, 1);
 
-            //grid.Children.Add(new Label
-            //{
-            //    Text = "Fixed 100x100",
-            //    TextColor = Color.Aqua,
-            //    BackgroundColor = Color.Red,
-            //    HorizontalTextAlignment = TextAlignment.Center,
-            //    VerticalTextAlignment = TextAlignment.Center
-            //}, 2, 3);
-
-            //grid.Children.Add(new Label
-            //{
-            //    Text = "Span two rows (or more if you want)",
-            //    TextColor = Color.Yellow,
-            //    BackgroundColor = Color.Navy,
-            //    HorizontalTextAlignment = TextAlignment.Center,
-            //    VerticalTextAlignment = TextAlignment.Center
-            //}, 2, 3, 1, 3);
-
-            //grid.Children.Add(new Label
-            //{
-            //    Text = "Autosized cell",
-            //    TextColor = Color.White,
-            //    BackgroundColor = Color.Blue
-            //}, 0, 1);
-
-            //grid.Children.Add(new BoxView
-            //{
-            //    Color = Color.Silver,
-            //    HeightRequest = 0
-            //}, 1, 1);
-
-            //grid.Children.Add(new BoxView
-            //{
-            //    Color = Color.Teal
-            //}, 0, 2);
-
-            // Accomodate iPhone status bar.
-            //this.Padding = new Thickness(10, Device.OnPlatform(20, 0, 0), 10, 5);
-            #endregion
-
-
-            //Чтение книги
-            htmlCon = readBook(book);
-            string temp = "";
-            int counterPage = 1;
-            int counterLetters = 0;
-            List<string> words = htmlCon.Split().ToList();
-            for (int i = 0; i < words.Count; i++)
+            numberOfPage = new Label()
             {
-                temp += words[i] + " ";
-                if (counterLetters == 150)
-                {
-
-                    var htmlSource = new HtmlWebViewSource();
-                    temp = temp.Replace("<title/>", "");
-                    htmlSource.BaseUrl = DependencyService.Get<IBaseUrl>().Get();
-                    htmlSource.Html = temp;
-
-                    webViews.Add(new WebView()
-                    {
-                        Source = htmlSource,
-                    });
-                    numberOfPages.Add(counterPage++);
-                    counterLetters = 0;
-                    temp = "";
-                }
-                counterLetters++;
-            }
-
-            CarouselView carousel = new CarouselView()
-            {
-                ItemsSource = numberOfPages,
+                Text = counterPage.ToString(),
+                FontSize = 15,
+                VerticalOptions = LayoutOptions.Center,
+                HorizontalOptions = LayoutOptions.Center,
+                Padding = 10,
+                FontFamily = "Kurale",
             };
-            carousel.ItemTemplate = new DataTemplate(() =>
-            {
-                Label nameLabel = new Label { Text = "Kek", FontSize = 20 };
-                //nameLabel.SetBinding(Label.TextProperty, "Name");
-
-                Image image = new Image { Source = ImageSource.FromStream(() => new MemoryStream(book.CoverImage)) };
-                //image.SetBinding(Image.SourceProperty, "ImageUrl");
-
-                Label locationLabel = new Label { Text = "Kek" };
-                //locationLabel.SetBinding(Label.TextProperty, "Location");
-
-                Label detailsLabel = new Label { Text = "Kek" };
-                //detailsLabel.SetBinding(Label.TextProperty, "Details");
-
-                StackLayout stackLayout = new StackLayout
-                {
-                    Children = { nameLabel, image, locationLabel, detailsLabel }
-                };
-
-
-                Frame frame = new Frame { Content = stackLayout };
-                StackLayout rootStackLayout = new StackLayout
-                {
-                    Children = { frame }
-                };
-
-                return rootStackLayout;
-            });
-
-            var assembly = IntrospectionExtensions.GetTypeInfo(typeof(Books)).Assembly;
-            Stream stream = assembly.GetManifestResourceStream("ReadS.XMLFile1.html");
-
 
             using (StreamWriter writer = new StreamWriter(Path.Combine(FileSystem.CacheDirectory, "style.css"), true, Encoding.Default))
             {
-                writer.Write(GetHtmlSourceWithCustomCss(book));
+                writer.Write(GetCss(book));
             }
 
-            var urlSource = new HtmlWebViewSource();
-            string html = readBook(book);
+            html = ReadBook(book);
             html = html.Replace("<title/>", "");
-            urlSource.Html = html;
+            string headerString = "<header><meta name='viewport' content='width=device-width, initial-scale=0.9, maximum-scale=5.0, minimum-scale=1.0, user-scalable=no'><style>img{max-width:100%}</style></header>";
+
+            fullHtml = headerString + html;
+            urlSource.Html = fullHtml;
             urlSource.BaseUrl = DependencyService.Get<IBaseUrl>().Get();
-            WebView webViewAll = new WebView()
+
+            webViewer = new WebViewer()
             {
                 Source = urlSource,
             };
-            WebViewer webViewer = new WebViewer()
-            {
-                Source = urlSource,
-            };
-            webViewer.HeightRequest = 1000;
+            webViewer.HeightRequest = 100000;
             webViewer.WidthRequest = 500;
             webViewer.Navigating += this.NavigatingEvent;
             scroll.Content = webViewer;
-            Button right = new Button();
+
+
+            right = new Button();
             right.Clicked += rightClick;
-            //right.Opacity = 0;
+            right.Opacity = 0;
 
-            grid.Children.Add(right, 0, 3, 1, 3);
+            left = new Button();
+            left.Clicked += leftClick;
+            left.Opacity = 0;
+
             grid.Children.Add(scroll, 0, 3, 1, 3);
+            grid.Children.Add(right, 2, 3, 0, 4);
+            grid.Children.Add(left, 0, 1, 0, 4);
+            grid.Children.Add(numberOfPage, 0, 3, 3, 4);
 
-
-            Slider slider = new Slider
-            {
-                Minimum = 0,
-                Maximum = 100,
-                Value = 10,
-                ThumbColor = Color.Gray,
-                MinimumTrackColor = Color.CadetBlue,
-                Margin = 20,
-            };
-            slider.VerticalOptions = LayoutOptions.FillAndExpand;
-            slider.VerticalOptions = LayoutOptions.CenterAndExpand;
-            slider.ValueChanged += (sender, args) =>
-            {
-                
-            };
-
-          //grid.Children.Add(new Slider
-          // {
-          //     Minimum = 0,
-          //     Maximum = 100,
-          //     ThumbColor = Color.Gray,
-          //     MinimumTrackColor = Color.CadetBlue,
-          // }, 0, 3, 3, 4);
-
-            // Build the page.
             this.Content = grid;
-            //this.Content = new StackLayout { Children = { webView } };
         }
 
         private void NavigatingEvent(object sender, WebNavigatingEventArgs e)
         {
-           
+            if (e.Url.Contains("bottom") || e.Url.Contains("about:blank"))
+            {
+                e.Cancel = true;
+            }
         }
 
-        public string readBook(EpubBook book)
+        public string ReadBook(EpubBook book)
         {
+            //Переменная в которую добавляется весь текст html
             string chapterHtmlContent = "";
 
-            //Читаем по главам
+            //Чтение по главам
             foreach (EpubChapter chapter in book.Chapters)
             {
-                // Title of chapter
-                //chapterHtmlContent += chapter.Title;
-
-                // HTML content of current chapter
                 chapterHtmlContent += chapter.HtmlContent;
 
-                // Nested chapters
+                //Чтение всех подглав
                 List<EpubChapter> subChapters = chapter.SubChapters;
                 foreach (EpubChapter item in subChapters)
                 {
@@ -284,47 +191,33 @@ namespace ReadS
                     htmlCon = chapter.HtmlContent;
                 }
             }
-
-            //Читаем весь html
-            string htmlContent = "";
-            Dictionary<string, EpubTextContentFile> htmlFiles = book.Content.Html;
-            foreach (EpubTextContentFile htmlFile in htmlFiles.Values)
-            {
-                htmlContent += htmlFile.Content;
-            }
-
-
-            //label = new Label();
-            //label.Text = chapterHtmlContent;
-            //label.FontSize = 15;
-            //label.TextType = TextType.Html;
-
-            //return htmlContent;
             return chapterHtmlContent;
         }
 
-        public string GetHtmlSourceWithCustomCss(EpubBook book)
+        public string GetCss(EpubBook book)
         {
             string cssContent = "";
             foreach (EpubTextContentFile cssFile in book.Content.Css.Values)
             {
                 cssContent += cssFile.Content;
             }
-
-            // Replace css
-            //var customCss = book.Content.Css;
-            //htmlCode = htmlCode.Replace("<head>", cssContent);
-
-            //htmlSource.Html = htmlCode;
             return cssContent;
         }
 
         public void rightClick(object sender, EventArgs e)
         {
-            positionOfBook += 770;
+            positionOfBook += 720;
+            if (positionOfBook > loadedContent - 1000)
+            {
+                webViewer.Reload();
+                loadedContent += 10000;
+            }
             Goal.pagesRead++;
-            scroll.ScrollToAsync(0, positionOfBook, false); //scrolls so that the position at 150px from the top is visible
+            counterPage++;
+            numberOfPage.Text = counterPage.ToString();
+            scroll.ScrollToAsync(0, positionOfBook, false);
             Goal.pagesRead += 1;
+            Goal.SaveGoal();
             Goal.RefreshGoalGraph();
         }
 
@@ -332,9 +225,72 @@ namespace ReadS
         {
             if (positionOfBook > 0)
             {
-                positionOfBook -= 770;
+                Goal.pagesRead--;
+                positionOfBook -= 720;
+                counterPage--;
+                numberOfPage.Text = counterPage.ToString();
             }
-            //scroll.ScrollToAsync(0, positionOfBook, false); //scrolls so that the position at 150px from the top is visible
+            scroll.ScrollToAsync(0, positionOfBook, false);
+        }
+
+        public void DecreaseTextSize(object sender, EventArgs e)
+        {
+            html = html.Replace("<title/>", "");
+            string headerString = "<header><meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=0.8, user-scalable=no'><style>img{max-width:100%}</style></header>";
+            urlSource.Html = headerString + html;
+            startSizeText -= 0.1;
+            WebViewer webViewer = new WebViewer();
+            webViewer.Source = urlSource;
+            ScrollView scroll = new ScrollView();
+            scroll.Content = webViewer;
+            Button newRight = new Button();
+            Button newLeft = new Button();
+            newRight.Clicked += rightClick;
+            newLeft.Clicked += leftClick;
+            newLeft.Opacity = 0;
+            newRight.Opacity = 0;
+
+
+            grid.Children.Add(scroll, 0, 3, 1, 3);
+            grid.Children.Add(newRight, 2, 3, 0, 4);
+            grid.Children.Add(newLeft, 0, 1, 0, 4);
+        }
+
+        public void IncreaseTextSize(object sender, EventArgs e)
+        {
+            html = html.Replace("<title/>", "");
+            string headerString = "<header><meta name='viewport' content='width=device-width, initial-scale=2.0, maximum-scale=5.0, minimum-scale=1.0, user-scalable=no'><style>img{max-width:100%}</style></header>";
+            HtmlWebViewSource urlSource = new HtmlWebViewSource();
+            urlSource.BaseUrl = DependencyService.Get<IBaseUrl>().Get();
+            urlSource.Html = headerString + html;
+            startSizeText += 0.1;
+            WebViewer webViewer = new WebViewer();
+            webViewer.Source = urlSource;
+            scroll = new ScrollView();
+            scroll.Content = webViewer;
+            Button newRight = new Button();
+            Button newLeft = new Button();
+            newRight.Clicked += rightClick;
+            newLeft.Clicked += leftClick;
+            newLeft.Opacity = 0;
+            newRight.Opacity = 0;
+
+
+            grid.Children.Add(scroll, 0, 3, 1, 3);
+            grid.Children.Add(newRight, 2, 3, 0, 4);
+            grid.Children.Add(newLeft, 0, 1, 0, 4);
+        }
+
+        public async void SearchPage(object sender, EventArgs e)
+        {
+            string search = await DisplayPromptAsync("Поиск по страницам", "К какой странице вы желаете перейти?");
+            if (int.TryParse(search, out int findPageNum) && findPageNum > 0 && findPageNum <= amountOfPages)
+            {
+                positionOfBook = findPageNum * 730;
+                await scroll.ScrollToAsync(0, positionOfBook, false);
+                counterPage = findPageNum;
+                numberOfPage.Text = findPageNum.ToString();
+            }
         }
     }
 

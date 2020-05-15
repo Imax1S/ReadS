@@ -16,13 +16,13 @@ namespace ReadS
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class Days : ContentPage
     {
+        //Создание переменных
         static List<DayStat> dayStats = new List<DayStat>();
         static Microcharts.Forms.ChartView StatsOfReadingByDates = new Microcharts.Forms.ChartView();
-        static string filename = Path.Combine(FileSystem.AppDataDirectory, "stats.txt");
+        static string filename = Path.Combine(FileSystem.AppDataDirectory, "stats.json");
         ScrollView scroll = new ScrollView()
         {
             Orientation = ScrollOrientation.Horizontal,
-            //FlowDirection = FlowDirection.RightToLeft,
         };
         Dictionary<int, string> namesOfMonths = new Dictionary<int, string> {
             {1, "Январь" },
@@ -42,47 +42,61 @@ namespace ReadS
         {
             InitializeComponent();
 
-            fillDayGraph();
-            scroll.Content = StatsOfReadingByDates;
-            scroll.VerticalOptions = LayoutOptions.Center;
-            scroll.HorizontalOptions = LayoutOptions.Center;
-            Label header = new Label
+            //Если есть данные для графика, то рисует его
+            if (FillDayGraph())
             {
-                Text = namesOfMonths[dayStats[0].Date.Month],
-                FontSize = 40,
-                HorizontalOptions = LayoutOptions.Center,
-                Padding = 20,
-            };
-            this.Padding = new Thickness(10, Device.OnPlatform(20, 20, 0), 10, 5);
-            Content = new StackLayout()
+                scroll.Content = StatsOfReadingByDates;
+                scroll.VerticalOptions = LayoutOptions.Center;
+                scroll.HorizontalOptions = LayoutOptions.Center;
+                Label header = new Label
+                {
+                    Text = namesOfMonths[dayStats[0].Date.Month],
+                    FontSize = 40,
+                    HorizontalOptions = LayoutOptions.Center,
+                    Padding = 20,
+                };
+                this.Padding = new Thickness(10, Device.OnPlatform(20, 20, 0), 10, 5);
+                Content = new StackLayout()
+                {
+                    Children = { header, scroll }
+                };
+            }
+            else
             {
-                Children = { header, scroll }
-            };
+                //Если нет, то пишет, что статистики пока что нет
+                Label noStat = new Label()
+                {
+                    Text = "Пока что ещё нет статистики. Начните читать и она будет здесь)",
+                    VerticalOptions = LayoutOptions.CenterAndExpand,
+                    HorizontalOptions = LayoutOptions.CenterAndExpand,
+                    FontSize = 16,
+                    Padding = 10
+                };
+                Content = new StackLayout()
+                {
+                    Children = { noStat }
+                };
+            }
+;
         }
 
-        static public void fillDayGraph()
+        /// <summary>
+        /// Заполняет граф с днями
+        /// </summary>
+        static public bool FillDayGraph()
         {
-            Random random = new Random();
+            //Лист с точками на графике
             List<Entry> entries = new List<Entry>();
             try
             {
+                //Чтение файла
                 using (StreamReader reader = new StreamReader(filename))
                 {
                     string json = reader.ReadToEnd();
                     dayStats = JsonConvert.DeserializeObject<List<DayStat>>(json);
                 }
 
-                //for (int i = 0; i < 3; i++)
-                //{
-                //    int ran = random.Next(0, 100);
-                //    entries.Add(new Entry(ran)
-                //    {
-                //        Color = SKColor.Parse("#4285F4"),
-                //        Label = new DateTime(2020, 5, i + 1).ToString(),
-                //        ValueLabel = ran.ToString(),
-                //    });
-                //}
-
+                //Для каждого дня создается точка
                 foreach (DayStat day in dayStats)
                 {
                     entries.Add(new Entry(day.Pages)
@@ -93,22 +107,19 @@ namespace ReadS
                     });
                 }
 
-                StatsOfReadingByDates.HeightRequest = 300;
+                //Определяется размер графика
+                StatsOfReadingByDates.HeightRequest = 500;
                 StatsOfReadingByDates.WidthRequest = 100 * entries.Count;
 
-                StatsOfReadingByDates.Chart = new Microcharts.LineChart { Entries = entries, LabelTextSize = 40, BackgroundColor = SKColor.Parse("#FFFFFF") };
+                StatsOfReadingByDates.Chart = new Microcharts.LineChart { Entries = entries, LabelTextSize = 40, BackgroundColor = SKColor.Parse("#FAFAFA") };
+                
+                //После успешного чтения возращает true
+                return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
-                Label noStat = new Label()
-                {
-                    Text = "Пока что ещё нет статистики. Начните читать и она будет здесь)",
-                    VerticalOptions = LayoutOptions.CenterAndExpand,
-                    HorizontalOptions = LayoutOptions.CenterAndExpand,
-                    FontSize = 16,
-                    Padding = 10
-                };
+                //Если ловится исключение, то возвращает false
+                return false;
             }
         }
     }
