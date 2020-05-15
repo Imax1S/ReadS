@@ -65,16 +65,17 @@ namespace ReadS
             }
             else
             {
-                //Если нет, то отрисовывает
+                //Если есть, то отрисовывает
+                scroll.Content = StatsOfReadingByDates;
+
                 Label header = new Label
                 {
-                    Text = dayStats[0].Date.Year.ToString(),
+                    Text = "2020",
                     FontSize = 40,
                     HorizontalOptions = LayoutOptions.Center,
                     Padding = 20,
                 };
                 this.Padding = new Thickness(10, Device.OnPlatform(20, 20, 0), 10, 5);
-                scroll.Content = StatsOfReadingByDates;
                 Content = new StackLayout()
                 {
                     Children = { header, scroll }

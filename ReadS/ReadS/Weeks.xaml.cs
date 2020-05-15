@@ -73,6 +73,10 @@ namespace ReadS
                     FontSize = 16,
                     Padding = 10
                 };
+                Content = new StackLayout()
+                {
+                    Children = { noStat }
+                };
             }
 
         }
@@ -86,20 +90,6 @@ namespace ReadS
             List<Entry> entries = new List<Entry>();
             try
             {
-
-                entries.Add(new Entry(300)
-                {
-                    Color = SKColor.Parse("#4285F4"),
-                    Label = "26 - 2",
-                    ValueLabel = (300).ToString(),
-                });
-
-                entries.Add(new Entry(290)
-                {
-                    Color = SKColor.Parse("#4285F4"),
-                    Label = "3 - 9",
-                    ValueLabel = (290).ToString(),
-                });
 
                 //Чтения файла
                 using (StreamReader reader = new StreamReader(filename))
